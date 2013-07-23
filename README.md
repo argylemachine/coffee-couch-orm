@@ -1,4 +1,4 @@
 coffee-couch-orm
 ================
 
-Coffeescript + Couchdb ORM
+npm install couch-orm
