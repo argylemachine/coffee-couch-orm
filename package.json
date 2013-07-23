@@ -1,0 +1,13 @@
+{
+	"name": "couch-orm",
+	"description": "A CouchDB ORM",
+	"keywords": [ "couchdb", "couch", "orm", "odm" ],
+	"version": "0.0.1",
+	"private": false,
+	"license": "BSD",
+	"contributors": [ { "name": "Robert Keizer", "email": "robert@keizer.ca", "url": "http://robert.keizer.ca/" } ],
+	"dependencies": { "coffee-script": ">=1.6.2" },
+	"devDependencies": { "logging": "latest", "async": "latest" },
+	"main": "orm.coffee",
+	"repository": { "type": "git", "url": "https://github.com/robertkeizer/coffee-couch-orm.git" }
+}
