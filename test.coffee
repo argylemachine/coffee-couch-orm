@@ -21,6 +21,8 @@ orm.Base.prototype.Server = server
 log "Creating a person 'rob'"
 rob = new Person "Rob"
 
+log util.inspect rob.get_server( )
+
 log "Changing the server to some dummy thing."
 orm.Base.prototype.Server = "Foobar"
 
