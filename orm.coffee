@@ -58,12 +58,33 @@ class Base
 
 			# Make a query for the view document as an easy test of existence.
 			that::Server.get_doc "_design/" + that.name + "/_view/" + "by-" + key, ( err, res ) ->
-				if err
-					# At this point try and create the view..
-					#TODO
+				if err and err is "not_found"
+					# Try and create the view..
 
+					# Get the whole design doc .. 
+					# if we come back with an error on getting it, we'll need to create it.
+					# otherwise we're going to have to issue an update to create the view.
+					that::Server.get_doc "_design/" + that.name, ( err, doc ) ->
+						if err
+							# No design doc exists.. we should create one here.
+							# TODO
+							return cb err
+
+						# Design doc exists..
+						
+						# Update doc.views with a new view.. and create new_doc
+						
+						# Then run
+						#	that::Server.set_doc "_design/" + that.name, new_doc
+
+						# For now just return here so that shit still works.
+						return cb err
+
+				else if err
 					return cb err
-				cb null
+				else
+					# No error.
+					cb null
 
 		, ( err ) ->
 			if err
