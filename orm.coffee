@@ -7,26 +7,32 @@ class Server
 
 	_get_dbs: ( cb ) ->
 		# Get a list of databases back.
-		http.get @url + "_all_dbs", ( res ) ->
-			res.setEncoding "utf8"
-
-			_response = ""
-
-			res.on "error", ( err ) ->
-				return cb err
-
-			res.on "data", ( chunk ) ->
-				_response += chunk
-
-			res.on "end", ( ) ->
-				return cb null, JSON.parse _response
+		@_get @url + "_all_dbs", ( err, res ) ->
 		
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
+	_get: ( url, cb ) ->
+		# Just wraps http.get to make it a little easier.
+		http.get url, ( res ) ->
+			res.setEncoding "utf8"
+			_r = ""
+			res.on "error", ( err ) ->
+				return cb err
+			res.on "data", ( chunk ) ->
+				_r += chunk
+			res.on "end", ( ) ->
+				_k = JSON.parse _r
+				if _k.error?
+					return cb _k.error
+				
+				return cb null, _k
+
 	get_doc: ( id, cb ) ->
-		log "Querying ID " + id
-		return cb "No!"
+		@_get @url + @db + "/" + id, ( err, res ) ->
+			if err
+				return cb err
+			return cb null, res
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
