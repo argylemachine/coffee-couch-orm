@@ -4,18 +4,15 @@ orm	= require "./orm"
 
 class Person extends orm.Base
 
-	name: ( @name=null ) ->
-		if not name
+	name: ( @name, _r_type=null ) ->
+		if _r_type
 			return ""
 		@name
 	
-	age: ( @age=null ) ->
-		if not age
+	age: ( @age, _r_type=null ) ->
+		if _r_type
 			return 0
 		@age
-
-	get_server: ( ) ->
-		return @Server
 
 server = new orm.Server "http://localhost:5984/", "orm"
 

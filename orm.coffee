@@ -13,6 +13,7 @@ class Server
 		# Creates a database..
 
 	_get: ( url, cb ) ->
+		log url
 		# Just wraps http.get to make it a little easier.
 		http.get url, ( res ) ->
 			res.setEncoding "utf8"
@@ -46,7 +47,9 @@ class Base
 	@ensure_views: ( cb ) ->
 		# Because of issues in keeping 'this', 'that' is now 'this' :)
 		that = @
-		async.map [ key for key, value of @spec( ) ], ( key, cb ) ->
+
+		_keys = Object.keys @spec( )
+		async.map _keys, ( key, cb ) ->
 			# Make a query for the document..
 			that::Server.get_doc "_design/" + that.name + "/_view/" + "by-" + key, ( err, res ) ->
 				if err
@@ -64,7 +67,7 @@ class Base
 
 	@spec: ( ) ->
 		_return = { }
-		_return[key] = typeof @::[key]( ) for key, value of (@::) when key not in _hidden_functions
+		_return[key] = typeof @::[key]( null, true ) for key, value of (@::) when key not in _hidden_functions
 		_return
 
 	@delete: ( ) ->
