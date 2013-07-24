@@ -23,25 +23,11 @@ class Server
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
-server = new Server "http://localhost:5984/", "orm"
-
 class Base
-	debug: ( ) ->
-		return @Server
-
-class Person extends Base
-	constructor: (@name) ->
+	find: ( ) ->
 		
-	say_hi: ( ) ->
-		return "Hi " + @name
-
-class Student extends Base
-	constructor: (@name) ->
+	delete: ( ) ->
 		
-	set_year: ( @year ) ->
 
-Base.prototype.Server = server
-util.log util.inspect Person, true, 9
-
-rob = new Person "Rob"
-util.log util.inspect rob.debug( )
+exports.Server	= Server
+exports.Base	= Base
