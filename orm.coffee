@@ -52,9 +52,11 @@ class Base
 		# Because of issues in keeping 'this', 'that' is now 'this' :)
 		that = @
 
+		# Run through each of the attributes..
 		_keys = Object.keys @spec( )
 		async.map _keys, ( key, cb ) ->
-			# Make a query for the document..
+
+			# Make a query for the view document as an easy test of existence.
 			that::Server.get_doc "_design/" + that.name + "/_view/" + "by-" + key, ( err, res ) ->
 				if err
 					# At this point try and create the view..
