@@ -23,18 +23,25 @@ class Server
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
-	say_hi_server: ( ) ->
-		return "Hi from server: " + @url + " " + @db
+	get_doc: ( id ) ->
+		log "GOT HERE"
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
-	@find: ( ) ->
-		# @name is class name.
-		# @:: is the class of what was being searched for.
-		for key, value of (@::) when key not in _hidden_functions
-			log "I got '" + key + "': '" + value + "'\n"
+	@find_all: ( ) ->
 
-		return { }
+	@ensure_views: ( cb ) ->
+		for key in @spec( )
+			_view_doc = @::Server.get_doc "_design" + @name + "/" + "by-" + key
+			if _view_doc.error?
+				return cb _view_doc.error
+
+		return cb null
+
+	@spec: ( ) ->
+		_return = { }
+		_return[key] = typeof @::[key]( ) for key, value of (@::) when key not in _hidden_functions
+		_return
 
 	@delete: ( ) ->
 		
