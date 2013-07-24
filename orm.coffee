@@ -1,28 +1,41 @@
+util	= require "util"
+http	= require "http"
+
 class Server
-	constructor: ( database_options ) ->
-		@validate_database_options database_options, ( err ) ->
-			if err
-				throw err
-			@database_options = database_options
+	constructor: ( @url, @db ) ->
 
-	validate_database_options: ( database_options, cb ) ->
-		for required in [ "url", "db" ]
-			if not database_options[required]?
-				return cb "Required field " + required + " not specified."
-		cb null
+	_get_dbs: ( cb ) ->
+		# Get a list of databases back.
+		http.get @url + "_all_dbs", ( res ) ->
+			res.setEncoding "utf8"
 
-	link: ( _instance, cb ) =>
-		_instance.server = this
-		cb null
-class BASE
-	new: ( ) ->
-		# Creates a new object and document...
+			_response = ""
 
-	delete: ( ) ->
-		# Removes the document and the object.
+			res.on "error", ( err ) ->
+				return cb err
 
-	find: ( ) ->
-		# Find like types in the database.
+			res.on "data", ( chunk ) ->
+				_response += chunk
 
-exports.Server	= Server
-exports.BASE	= BASE
+			res.on "end", ( ) ->
+				return cb null, JSON.parse _response
+		
+	_create_db: ( db, cb ) ->
+		# Creates a database..
+
+server = new Server "http://localhost:5984/", "orm"
+
+class Person
+	constructor: (@name) ->
+		
+	say_hi: ( ) ->
+		return "Hi " + @name
+
+	debug: ( ) ->
+		return @Server
+
+Person.prototype.Server = server
+util.log util.inspect Person, true, 9
+
+rob = new Person "Rob"
+util.log util.inspect rob.debug( )
