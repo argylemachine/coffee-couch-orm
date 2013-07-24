@@ -3,12 +3,16 @@ log	= require( "logging" ).from __filename
 orm	= require "./orm"
 
 class Person extends orm.Base
-	TEST = "FOOBAR"
 
-	constructor: ( @name ) ->
-
-	say_hi: ( ) ->
-		return "Hi " + @name
+	name: ( @name=null ) ->
+		if not name
+			return ""
+		@name
+	
+	age: ( @age=null ) ->
+		if not age
+			return 0
+		@age
 
 	get_server: ( ) ->
 		return @Server
@@ -19,4 +23,4 @@ orm.Base.prototype.Server = server
 
 rob = new Person "Rob"
 
-log util.inspect Person.find( )
+log util.inspect Person.find( ), 9, true

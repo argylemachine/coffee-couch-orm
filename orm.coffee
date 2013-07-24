@@ -1,3 +1,4 @@
+log	= require("logging").from __filename
 http	= require "http"
 
 class Server
@@ -26,13 +27,16 @@ class Server
 		return "Hi from server: " + @url + " " + @db
 
 class Base
+	_hidden_functions = [ "constructor", "Server" ]
 	@find: ( ) ->
 		# @name is class name.
 		# @:: is the class of what was being searched for.
-		return @::
-		@::Server.say_hi_server( )
+		for key, value of (@::) when key not in _hidden_functions
+			log "I got '" + key + "': '" + value + "'\n"
 
-	delete: ( ) ->
+		return { }
+
+	@delete: ( ) ->
 		
 
 exports.Server	= Server
