@@ -20,6 +20,6 @@ orm.Base.prototype.Server = server
 
 rob = new Person "Rob"
 
-Person.find_all ( err, res ) ->
+Person.find_all { "some": "filter" }, ( err, res ) ->
 	log "Error is " + err
 	log "Res is " + res

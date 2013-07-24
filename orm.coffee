@@ -38,10 +38,14 @@ class Server
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
 
-	@find_all: ( cb ) ->
+	@find_all: ( filter, cb ) ->
 		@ensure_views ( err, res ) ->
 			if err
 				return cb err
+
+			# At this point make a request based on the filter..
+			# Use @::Server.. 
+
 			return cb null, res
 
 	@ensure_views: ( cb ) ->
