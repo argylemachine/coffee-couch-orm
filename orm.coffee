@@ -25,16 +25,22 @@ class Server
 
 server = new Server "http://localhost:5984/", "orm"
 
-class Person
+class Base
+	debug: ( ) ->
+		return @Server
+
+class Person extends Base
 	constructor: (@name) ->
 		
 	say_hi: ( ) ->
 		return "Hi " + @name
 
-	debug: ( ) ->
-		return @Server
+class Student extends Base
+	constructor: (@name) ->
+		
+	set_year: ( @year ) ->
 
-Person.prototype.Server = server
+Base.prototype.Server = server
 util.log util.inspect Person, true, 9
 
 rob = new Person "Rob"
