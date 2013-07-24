@@ -23,4 +23,8 @@ orm.Base.prototype.Server = server
 
 rob = new Person "Rob"
 
-log util.inspect Person.find( ), 9, true
+#log Person.spec( )
+
+log Person.find_all ( err, res ) ->
+	log "Error is " + err
+	log "Res is " + res

@@ -1,3 +1,4 @@
+async	= require "async"
 log	= require("logging").from __filename
 http	= require "http"
 
@@ -24,15 +25,24 @@ class Server
 		# Creates a database..
 
 	get_doc: ( id ) ->
-		log "GOT HERE"
+		log "ID was " + id
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
-	@find_all: ( ) ->
+
+	@find_all: ( cb ) ->
+		log @name
+
+		@ensure_views ( err, res ) ->
+			log "GOT HERE!!!"
 
 	@ensure_views: ( cb ) ->
-		for key in @spec( )
-			_view_doc = @::Server.get_doc "_design" + @name + "/" + "by-" + key
+		for key, value of @spec( )
+			log "Name is " + @name
+			@::Server.get_doc "_design/" + @name + "/_view/" + "by-" + key, ( err, res ) ->
+				if err 
+					return cb err
+				
 			if _view_doc.error?
 				return cb _view_doc.error
 
