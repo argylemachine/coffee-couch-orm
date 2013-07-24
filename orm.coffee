@@ -1,4 +1,3 @@
-util	= require "util"
 http	= require "http"
 
 class Server
@@ -23,9 +22,16 @@ class Server
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
+	say_hi_server: ( ) ->
+		return "Hi from server: " + @url + " " + @db
+
 class Base
-	find: ( ) ->
-		
+	@find: ( ) ->
+		# @name is class name.
+		# @:: is the class of what was being searched for.
+		return @::
+		@::Server.say_hi_server( )
+
 	delete: ( ) ->
 		
 
