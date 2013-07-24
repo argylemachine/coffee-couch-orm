@@ -24,29 +24,37 @@ class Server
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
-	get_doc: ( id ) ->
-		log "ID was " + id
+	get_doc: ( id, cb ) ->
+		log "Querying ID " + id
+		return cb "No!"
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
 
 	@find_all: ( cb ) ->
-		log @name
-
 		@ensure_views ( err, res ) ->
-			log "GOT HERE!!!"
+			if err
+				return cb err
+			return cb null, res
 
 	@ensure_views: ( cb ) ->
-		for key, value of @spec( )
-			log "Name is " + @name
-			@::Server.get_doc "_design/" + @name + "/_view/" + "by-" + key, ( err, res ) ->
-				if err 
-					return cb err
-				
-			if _view_doc.error?
-				return cb _view_doc.error
+		# Because of issues in keeping 'this', 'that' is now 'this' :)
+		that = @
+		async.map [ key for key, value of @spec( ) ], ( key, cb ) ->
+			# Make a query for the document..
+			that::Server.get_doc "_design/" + that.name + "/_view/" + "by-" + key, ( err, res ) ->
+				if err
+					# At this point try and create the view..
+					#TODO
 
-		return cb null
+					return cb err
+				cb null
+
+		, ( err ) ->
+			if err
+				return cb err
+
+			return cb null
 
 	@spec: ( ) ->
 		_return = { }
