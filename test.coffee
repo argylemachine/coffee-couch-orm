@@ -14,6 +14,9 @@ class Person extends orm.Base
 			return 0
 		@age
 
+	_some_thing: ( foo ) ->
+		"bar"
+
 server = new orm.Server "http://localhost:5984/", "orm"
 
 orm.Base.prototype.Server = server

@@ -97,8 +97,8 @@ class Base
 							return cb err
 						return cb null
 			else
-	
 				# Figure out what views we will need to generate ( if any ).
+
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
 
@@ -117,7 +117,7 @@ class Base
 
 	@spec: ( ) ->
 		_return = { }
-		for key, value of (@::) when key not in _hidden_functions
+		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
 			_return[key] = typeof @::[key]( null, true )
 		_return
 
