@@ -30,10 +30,17 @@ class Server
 				
 				return cb null, _k
 
-	_put: ( _url, data, cb ) ->
+	_put: ( _url, data, content_type, cb ) ->
 		# Helper for http.request with a PUT type.
+
+		# Parse the given url so that we can generate most of the options object
 		o = url.parse _url
-		o.method = "PUT"
+
+		# Fill in other parts of the options object.
+		o.method	= "PUT"
+		o.headers	= { "Content-Type": content_type }
+
+		# Make the request.
 		req = http.request o, ( res ) ->
 			res.setEncoding "utf8"
 			_r = ""
@@ -46,7 +53,8 @@ class Server
 				if _k.error?
 					return cb _k.error
 				return cb null, _k
-		
+
+		# Write the data to the request and end the request.
 		req.write data
 		req.end( )
 			
@@ -64,7 +72,7 @@ class Server
 				return cb null, res
 		else
 			# Value was specified, so we're setting the document..
-			@_put @_url + @db + "/" + id, value, ( err, res ) ->
+			@_put @_url + @db + "/" + id, JSON.stringify value, "application/json", ( err, res ) ->
 				if err 
 					return cb err
 				return cb null, res
