@@ -77,10 +77,14 @@ class Server
 			# Value was specified
 
 			# Do a put request to set the document.
-			@_put @_url + @db + "/" + id, JSON.stringify value, "application/json", ( err, res ) ->
+			@_put @_url + @db + "/" + id, JSON.stringify( value ), "application/json", ( err, res ) ->
 				if err 
 					return cb err
 				return cb null, res
+
+	view: ( design_name, view, cb ) ->
+		# Just a helper to wrap a doc request really.
+		@doc @_url + @db + "/_design/" + design_name + "/_view/" + view, cb
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
@@ -91,6 +95,7 @@ class Base
 				return cb err
 
 			# At this point make a request based on the filter..
+			@::Server.
 			# Use @::Server.. 
 
 			return cb null
@@ -135,6 +140,8 @@ class Base
 			else
 				# Figure out what views we will need to generate ( if any ).
 
+				log "Found design doc"
+
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
 
@@ -142,14 +149,29 @@ class Base
 				for key, value of @spec( )
 
 					# If the key doesn't exist in the document we just pulled, shove it into to_generate.
-					if key not in existing_views
+					if not key in existing_views
 						to_generate[key] = value
 		
-				# Use to_generate to generate any views that are missing. Then merge into the document..
-				#TODO
+				# Exit out here if we have all the views we should in the design document already.
+				if Object.keys( to_generate ).length is 0
+					log "No need to update doc."
+					return cb null
 
-				# Verify the document to make sure it contains all the correct views.
-				return cb null
+				# Get the views and send the request to update the document..
+				@generate_views to_generate, ( err, views ) =>
+					if err
+						return cb null
+
+					# Iterate through the response and update the 'doc' object which we grabbed.
+					for key, value of views
+						if not doc.views[key]?
+							doc.views[key] = views[key]
+						
+					# Make a request to set the document..
+					@::Server.doc "_design/" + @name, doc, ( err ) ->
+						if err 
+							return cb err
+						return cb null
 
 	@spec: ( ) ->
 		_return = { }
