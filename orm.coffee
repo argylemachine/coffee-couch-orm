@@ -97,18 +97,19 @@ class Base
 							return cb err
 						return cb null
 			else
-				# Generate an object that holds all the views that should exist.
-				valid_views = { }
+	
+				# Figure out what views we will need to generate ( if any ).
+				to_generate	= { }
+				existing_views	= Object.keys doc.views
 
+				# Iterate over all the keys that should exist..
 				for key, value of @spec( )
-					valid_views[key] = false
-		
-				# Iterate over all the view names in the document, setting the value of valid_views to true for that index.
-				for view_name in Object.keys doc.views
-					valid_views[view_name] = true
 
-				# Take a look and see if any item in valid_views is still set to false.. These are the views that will need
-				# to be created.
+					# If the key doesn't exist in the document we just pulled, shove it into to_generate.
+					if key not in existing_views
+						to_generate[key] = value
+		
+				# Use to_generate to generate any views that are missing. Then merge into the document..
 				#TODO
 
 				# Verify the document to make sure it contains all the correct views.
