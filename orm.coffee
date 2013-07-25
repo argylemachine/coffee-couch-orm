@@ -1,21 +1,22 @@
 async	= require "async"
 log	= require("logging").from __filename
 http	= require "http"
+url	= require "url"
 
 class Server
-	constructor: ( @url, @db ) ->
+	constructor: ( @_url, @db ) ->
 
 	_get_dbs: ( cb ) ->
 		# Get a list of databases back.
-		@_get @url + "_all_dbs", ( err, res ) ->
+		@_get @_url + "_all_dbs", ( err, res ) ->
 		
 	_create_db: ( db, cb ) ->
 		# Creates a database..
 
-	_get: ( url, cb ) ->
-		log url
+	_get: ( _url, cb ) ->
+		log _url
 		# Just wraps http.get to make it a little easier.
-		http.get url, ( res ) ->
+		http.get _url, ( res ) ->
 			res.setEncoding "utf8"
 			_r = ""
 			res.on "error", ( err ) ->
@@ -29,6 +30,24 @@ class Server
 				
 				return cb null, _k
 
+	_post: ( _url, cb ) ->
+		# Helper for http.request with a PUT type.
+		o = url.parse _url
+		o.method = "POST"
+		http.request o, ( res ) ->
+			res.setEncoding "utf8"
+			_r = ""
+			res.on "error", ( err ) ->
+				return cb err
+			res.on "data", ( chunk ) ->
+				_r += chunk
+			res.on "end", ( ) ->
+				_k = JSON.parse _r
+				if _k.error?
+					return cb _k.error
+				return cb null, _k
+			
+
 	doc: ( id, value, cb ) ->
 		# Do a little shuffle to allow both doc( id, cb ) and doc( id, value, cb )
 		if not cb
@@ -36,7 +55,7 @@ class Server
 			value	= null
 
 		if not value
-			@_get @url + @db + "/" + id, ( err, res ) ->
+			@_get @_url + @db + "/" + id, ( err, res ) ->
 				if err
 					return cb err
 				return cb null, res
