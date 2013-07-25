@@ -60,18 +60,23 @@ class Server
 			
 
 	doc: ( id, value, cb ) ->
-		# Do a little shuffle to allow both doc( id, cb ) and doc( id, value, cb )
+		# Do a little shuffle to allow both
+		#  * doc( id, cb )
+		#  * doc( id, value, cb )
 		if not cb
 			cb	= value
 			value	= null
-
+	
+		# Just do a simple get request for the particular id.
 		if not value
 			@_get @_url + @db + "/" + id, ( err, res ) ->
 				if err
 					return cb err
 				return cb null, res
 		else
-			# Value was specified, so we're setting the document..
+			# Value was specified
+
+			# Do a put request to set the document.
 			@_put @_url + @db + "/" + id, JSON.stringify value, "application/json", ( err, res ) ->
 				if err 
 					return cb err
