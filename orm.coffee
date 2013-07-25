@@ -96,26 +96,28 @@ class Base
 						if err
 							return cb err
 						return cb null
+			else
+				# Generate an object that holds all the views that should exist.
+				valid_views = { }
 
-			# Generate an object that holds all the views that should exist.
-			valid_views = { }
-			for key, value of @spec( )
-				valid_views[key] = false
+				for key, value of @spec( )
+					valid_views[key] = false
+		
+				# Iterate over all the view names in the document, setting the value of valid_views to true for that index.
+				for view_name in Object.keys doc.views
+					valid_views[view_name] = true
 
-			# Iterate over all the view names in the document, setting the value of valid_views to true for that index.
-			for view_name in Object.keys doc.views
-				valid_views[view_name] = true
+				# Take a look and see if any item in valid_views is still set to false.. These are the views that will need
+				# to be created.
+				#TODO
 
-			# Take a look and see if any item in valid_views is still set to false.. These are the views that will need
-			# to be created.
-			#TODO
-
-			# Verify the document to make sure it contains all the correct views.
-			return cb null
+				# Verify the document to make sure it contains all the correct views.
+				return cb null
 
 	@spec: ( ) ->
 		_return = { }
-		_return[key] = typeof @::[key]( null, true ) for key, value of (@::) when key not in _hidden_functions
+		for key, value of (@::) when key not in _hidden_functions
+			_return[key] = typeof @::[key]( null, true )
 		_return
 
 	@delete: ( ) ->
