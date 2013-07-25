@@ -21,5 +21,5 @@ orm.Base.prototype.Server = server
 rob = new Person "Rob"
 
 Person.find_all { "some": "filter" }, ( err, res ) ->
-	log "Error is " + err
+	log "Error is " + util.inspect err
 	log "Res is " + res

@@ -49,47 +49,27 @@ class Base
 			return cb null, res
 
 	@ensure_views: ( cb ) ->
-		# Because of issues in keeping 'this', 'that' is now 'this' :)
-		that = @
 
-		# Run through each of the attributes..
-		_keys = Object.keys @spec( )
-		async.map _keys, ( key, cb ) ->
-
-			# Make a query for the view document as an easy test of existence.
-			that::Server.get_doc "_design/" + that.name + "/_view/" + "by-" + key, ( err, res ) ->
-				if err and err is "not_found"
-					# Try and create the view..
-
-					# Get the whole design doc .. 
-					# if we come back with an error on getting it, we'll need to create it.
-					# otherwise we're going to have to issue an update to create the view.
-					that::Server.get_doc "_design/" + that.name, ( err, doc ) ->
-						if err
-							# No design doc exists.. we should create one here.
-							# TODO
-							return cb err
-
-						# Design doc exists..
-						
-						# Update doc.views with a new view.. and create new_doc
-						
-						# Then run
-						#	that::Server.set_doc "_design/" + that.name, new_doc
-
-						# For now just return here so that shit still works.
-						return cb err
-
-				else if err
-					return cb err
-				else
-					# No error.
-					cb null
-
-		, ( err ) ->
+		# Make a query for the design document. If we can't get that, we know we need to create all the views.
+		@::Server.get_doc "_design/" + @name, ( err, doc ) =>
 			if err
-				return cb err
+				# Make all of them..
+				_new_doc = { "language": "javascript", "views": { } }
+	
+				for key, value of @spec( )
+					view_name = "by-" + key
+					_new_doc.views[view_name] = { "map":	"""
+										function(doc) {
+											// Make sure that we only match correct documents.
+											if( doc._type != "#{key}" ){
+												return;
+											}
+											emit( doc.#{key}, doc );
+										}
+										""" }
+				return cb _new_doc
 
+			# Verify the document to make sure it contains all the correct views.
 			return cb null
 
 	@spec: ( ) ->
