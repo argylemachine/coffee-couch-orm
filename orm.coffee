@@ -29,45 +29,74 @@ class Server
 				
 				return cb null, _k
 
-	get_doc: ( id, cb ) ->
-		@_get @url + @db + "/" + id, ( err, res ) ->
-			if err
-				return cb err
-			return cb null, res
+	doc: ( id, value, cb ) ->
+		# Do a little shuffle to allow both doc( id, cb ) and doc( id, value, cb )
+		if not cb
+			cb	= value
+			value	= null
+
+		if not value
+			@_get @url + @db + "/" + id, ( err, res ) ->
+				if err
+					return cb err
+				return cb null, res
+		else
+			# Value was specified, so we're setting the document..
+			log id
+			log value
+			return cb "Foo"
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
 
 	@find_all: ( filter, cb ) ->
-		@ensure_views ( err, res ) ->
+		@ensure_views ( err ) ->
 			if err
 				return cb err
 
 			# At this point make a request based on the filter..
 			# Use @::Server.. 
 
-			return cb null, res
+			return cb null
+
+	@_generate_views: ( spec, cb ) ->
+		# Generate the views for the given spec.
+		# Returns an object that usually gets shoved / merged into doc.views
+		_r = { }
+		for key, value of spec
+			view_name = "by-" + key
+			_r[view_name] = { "map":	"""
+							function( doc ){
+								// Make sure we only match the correct documents..
+								if( doc._type != "#{@name}" ){
+									return
+								}
+								emit( doc.#{key}, doc );
+							}
+							""" }
+		cb null, _r
 
 	@ensure_views: ( cb ) ->
 
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
-		@::Server.get_doc "_design/" + @name, ( err, doc ) =>
+		@::Server.doc "_design/" + @name, ( err, doc ) =>
 			if err
 				# Make all of them..
 				_new_doc = { "language": "javascript", "views": { } }
+
+				@_generate_views @spec( ), ( err, views ) =>
+					if err
+						return cb err
+
+					# We have views, so shove them into the new design document that we're building.
+					_new_doc.views = views
+					
+					# Shove the document to the server and make sure its committed..
+					@::Server.doc "_design/" + @name, _new_doc, ( err ) ->
+						if err
+							return cb err
+						return cb null
 	
-				for key, value of @spec( )
-					view_name = "by-" + key
-					_new_doc.views[view_name] = { "map":	"""
-										function(doc) {
-											// Make sure that we only match correct documents.
-											if( doc._type != "#{key}" ){
-												return;
-											}
-											emit( doc.#{key}, doc );
-										}
-										""" }
-				return cb _new_doc
 
 			# Verify the document to make sure it contains all the correct views.
 			return cb null
