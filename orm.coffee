@@ -59,7 +59,7 @@ class Base
 
 			return cb null
 
-	@_generate_views: ( spec, cb ) ->
+	@generate_views: ( spec, cb ) ->
 		# Generate the views for the given spec.
 		# Returns an object that usually gets shoved / merged into doc.views
 		_r = { }
@@ -84,7 +84,7 @@ class Base
 				# Make all of them..
 				_new_doc = { "language": "javascript", "views": { } }
 
-				@_generate_views @spec( ), ( err, views ) =>
+				@generate_views @spec( ), ( err, views ) =>
 					if err
 						return cb err
 
@@ -96,7 +96,19 @@ class Base
 						if err
 							return cb err
 						return cb null
-	
+
+			# Generate an object that holds all the views that should exist.
+			valid_views = { }
+			for key, value of @spec( )
+				valid_views[key] = false
+
+			# Iterate over all the view names in the document, setting the value of valid_views to true for that index.
+			for view_name in Object.keys doc.views
+				valid_views[view_name] = true
+
+			# Take a look and see if any item in valid_views is still set to false.. These are the views that will need
+			# to be created.
+			#TODO
 
 			# Verify the document to make sure it contains all the correct views.
 			return cb null
