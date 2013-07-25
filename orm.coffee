@@ -87,7 +87,8 @@ class Server
 		@doc @_url + @db + "/_design/" + design_name + "/_view/" + view, cb
 
 class Base
-	_hidden_functions = [ "constructor", "Server" ]
+	_hidden_functions	= [ "constructor", "Server" ]
+	_default_views		= { "all": "placeholder" }
 
 	@find_all: ( filter, cb ) ->
 		@ensure_views ( err ) =>
@@ -108,6 +109,19 @@ class Base
 		# iterate over all the attributes..
 		for key, value of spec
 
+			if key in _default_views
+				if key is "all"
+					_r["all"] = { "map":	"""
+								function( doc ){
+									// Make sure we only match the correct documents..
+									if( doc._type == "#{@name}" ){
+										emit( null, doc );
+									}
+								}
+								""" }
+				continue
+				
+
 			# Define a by-xxx view that is fairly simple.
 			view_name = "by-" + key
 			_r[view_name] = { "map":	"""
@@ -119,16 +133,6 @@ class Base
 								emit( doc.#{key}, doc );
 							}
 							""" }
-
-		# The all view that goes into every design document.
-		_r["all"] = { "map":	"""
-					function( doc ){
-						// Make sure we only match the correct documents..
-						if( doc._type == "#{@name}" ){
-							emit( null, doc );
-						}
-					}
-					""" }
 		cb null, _r
 
 	@ensure_views: ( cb ) ->
@@ -153,14 +157,15 @@ class Base
 						return cb null
 			else
 				# Figure out what views we will need to generate ( if any ).
-
 				log "Found design doc"
 
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
 
+				log @valid_views( )
+
 				# Iterate over all the keys that should exist..
-				for key, value of @spec( )
+				for key of @valid_views( )
 
 					# If the key doesn't exist in the document we just pulled, shove it into to_generate.
 					if not key in existing_views
@@ -192,6 +197,17 @@ class Base
 		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
 			_return[key] = typeof @::[key]( null, true )
 		_return
+
+	@valid_views: ( ) ->
+
+		# Get the spec of the class as a starting point.
+		_r = @spec( )
+
+		# Add in the default views that are defined in the base.
+		for name, data of _default_views
+			_r[name] = data
+
+		_r
 
 	@delete: ( ) ->
 		
