@@ -104,7 +104,11 @@ class Base
 		# Generate the views for the given spec.
 		# Returns an object that usually gets shoved / merged into doc.views
 		_r = { }
+
+		# iterate over all the attributes..
 		for key, value of spec
+
+			# Define a by-xxx view that is fairly simple.
 			view_name = "by-" + key
 			_r[view_name] = { "map":	"""
 							function( doc ){
@@ -115,6 +119,16 @@ class Base
 								emit( doc.#{key}, doc );
 							}
 							""" }
+
+		# The all view that goes into every design document.
+		_r["all"] = { "map":	"""
+					function( doc ){
+						// Make sure we only match the correct documents..
+						if( doc._type == "#{@name}" ){
+							emit( null, doc );
+						}
+					}
+					""" }
 		cb null, _r
 
 	@ensure_views: ( cb ) ->
@@ -151,7 +165,7 @@ class Base
 					# If the key doesn't exist in the document we just pulled, shove it into to_generate.
 					if not key in existing_views
 						to_generate[key] = value
-		
+
 				# Exit out here if we have all the views we should in the design document already.
 				if Object.keys( to_generate ).length is 0
 					log "No need to update doc."
