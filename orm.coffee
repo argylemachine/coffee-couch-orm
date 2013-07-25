@@ -90,15 +90,15 @@ class Base
 	_hidden_functions = [ "constructor", "Server" ]
 
 	@find_all: ( filter, cb ) ->
-		@ensure_views ( err ) ->
+		@ensure_views ( err ) =>
 			if err
 				return cb err
 
 			# At this point make a request based on the filter..
-			@::Server.
-			# Use @::Server.. 
-
-			return cb null
+			@::Server.view @name, "all", ( err, res ) ->
+				if err
+					return cb err
+				return cb null, res
 
 	@generate_views: ( spec, cb ) ->
 		# Generate the views for the given spec.
