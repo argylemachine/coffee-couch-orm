@@ -30,11 +30,11 @@ class Server
 				
 				return cb null, _k
 
-	_post: ( _url, cb ) ->
+	_put: ( _url, data, cb ) ->
 		# Helper for http.request with a PUT type.
 		o = url.parse _url
-		o.method = "POST"
-		http.request o, ( res ) ->
+		o.method = "PUT"
+		req = http.request o, ( res ) ->
 			res.setEncoding "utf8"
 			_r = ""
 			res.on "error", ( err ) ->
@@ -46,6 +46,9 @@ class Server
 				if _k.error?
 					return cb _k.error
 				return cb null, _k
+		
+		req.write data
+		req.end( )
 			
 
 	doc: ( id, value, cb ) ->
@@ -61,9 +64,10 @@ class Server
 				return cb null, res
 		else
 			# Value was specified, so we're setting the document..
-			log id
-			log value
-			return cb "Foo"
+			@_put @_url + @db + "/" + id, value, ( err, res ) ->
+				if err 
+					return cb err
+				return cb null, res
 
 class Base
 	_hidden_functions = [ "constructor", "Server" ]
