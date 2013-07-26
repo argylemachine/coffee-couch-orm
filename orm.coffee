@@ -132,16 +132,16 @@ class Base
 			if err
 				return cb err
 
-			# Error out if there was more than one result.
-			if res.length > 1
+			# Error out if there was more than one result..
+			if res.total_rows > 1
 				return cb "More than one document found."
 
-			# Return a valid result if length is simply 1.
-			if res.length is 1
+			# Return a valid result if the response is simply 1.
+			if res.total_rows is 1
 				return cb null, res[0]
 			
 			# Simply return null back if nothing was found.
-			if res.length < 1
+			if res.total_rows < 1
 				return cb null, null
 
 	@generate_views: ( spec, cb ) ->

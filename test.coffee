@@ -4,6 +4,8 @@ orm	= require "./orm"
 
 class Person extends orm.Base
 
+	constructor: ( @_name ) ->
+
 	name: ( @_name, _r_type=null ) ->
 		if _r_type
 			return ""
@@ -27,3 +29,4 @@ Person.find_one { "name": "Rob" }, ( err, res ) ->
 	log "Error is " + util.inspect err
 	log "Res is " + res
 	log rob
+	log util.inspect rob, 9, true
