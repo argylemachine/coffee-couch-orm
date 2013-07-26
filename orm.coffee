@@ -195,17 +195,17 @@ class Base
 
 				# Iterate over all the keys that should exist..
 				for key,value of that.spec( )
+
+					# Right now just check to by-key view.. 
+					# in the future consider moving this logic out so that it isn't hardcoded.
 					to_check = "by-" + key
 					
-					if not existing_views[to_check]?
-						log to_check + " doesn't exist in " + existing_views
+					# If that view isn't defined in the design doc, include it in to_generate.
+					if to_check not in existing_views
 						to_generate[key] = value
-
-				log to_generate
 
 				# Exit out here if we have all the views we should in the design document already.
 				if Object.keys( to_generate ).length is 0
-					log "No need to update doc."
 					return cb null
 
 				# Get the views and send the request to update the document..
