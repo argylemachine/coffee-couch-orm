@@ -226,8 +226,15 @@ class Base
 
 	@spec: ( ) ->
 		_return = { }
-		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
-			_return[key] = typeof @::[key]( null, true )
+
+		# Iterate over the class definition since 
+		for key, value of (@) when key.charAt( 0 ) isnt "_" and typeof( @[key] ) isnt 'function'
+			_return[key] = @[key]
+
+		for key, value of (@::) when key.charAt( 0 ) isnt "_" and typeof( @::[key] ) isnt 'function' and not key in _hidden_functions
+			_return[key] = @::[key]
+
+		log _return
 		_return
 
 	@delete: ( ) ->
