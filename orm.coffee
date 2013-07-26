@@ -90,9 +90,14 @@ class Base
 	_hidden_functions	= [ "constructor", "Server" ]
 
 	@find: ( filter, cb ) ->
-		@ensure_views ( err ) =>
+		that = @
+		@ensure_views ( err ) ->
 			if err
 				return cb err
+
+			log "Got past ensure views"
+			log that.name
+			process.exit 1
 
 			filter_keys = Object.keys filter
 
@@ -164,12 +169,13 @@ class Base
 
 	@ensure_views: ( cb ) ->
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
+		that = @
 		@::Server.doc "_design/" + @name, ( err, doc ) ->
 			if err
 				# Make all of them..
 				_new_doc = { "language": "javascript", "views": { } }
 
-				@generate_views @spec( ), ( err, views ) =>
+				that.generate_views that.spec( ), ( err, views ) ->
 					if err
 						return cb err
 
@@ -177,7 +183,7 @@ class Base
 					_new_doc.views = views
 					
 					# Shove the document to the server and make sure its committed..
-					@::Server.doc "_design/" + @name, _new_doc, ( err ) ->
+					that::Server.doc "_design/" + that.name, _new_doc, ( err ) ->
 						if err
 							return cb err
 						return cb null
@@ -188,9 +194,14 @@ class Base
 				existing_views	= Object.keys doc.views
 
 				# Iterate over all the keys that should exist..
-				for key of @spec( )
-					if not key in existing_views
+				for key,value of that.spec( )
+					to_check = "by-" + key
+					
+					if not existing_views[to_check]?
+						log to_check + " doesn't exist in " + existing_views
 						to_generate[key] = value
+
+				log to_generate
 
 				# Exit out here if we have all the views we should in the design document already.
 				if Object.keys( to_generate ).length is 0
@@ -198,7 +209,7 @@ class Base
 					return cb null
 
 				# Get the views and send the request to update the document..
-				@generate_views to_generate, ( err, views ) =>
+				that.generate_views to_generate, ( err, views ) =>
 					if err
 						return cb null
 
@@ -208,7 +219,7 @@ class Base
 							doc.views[key] = views[key]
 						
 					# Make a request to set the document..
-					@::Server.doc "_design/" + @name, doc, ( err ) ->
+					that::Server.doc "_design/" + that.name, doc, ( err ) ->
 						if err 
 							return cb err
 						return cb null
