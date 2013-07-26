@@ -95,10 +95,6 @@ class Base
 			if err
 				return cb err
 
-			log "Got past ensure views"
-			log that.name
-			process.exit 1
-
 			filter_keys = Object.keys filter
 
 			# If no filter was specified return back an error..
@@ -108,8 +104,11 @@ class Base
 			# Make sure filter contains at least one key / value pair of a valid index.
 			# Do this by iterating over all the filter keys specified and checking if it
 			# exists in spec.
-			_spec = @spec( )
+			_spec = that.spec( )
 			diff = [ key for key in filter_keys when _spec[key]? ]
+
+			log diff
+			process.exit 1
 			
 			# Force a valid filter to have been specified.
 			if diff.length is 0
