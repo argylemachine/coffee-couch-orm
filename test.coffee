@@ -8,9 +8,13 @@ class Person extends orm.Base
 	@age	= "number"
 	@foo	= "number"
 
-	constructor: ( @fname ) ->
-		orm.Base.constructor( null )
-		log "wh?"
+	constructor: ( @_name ) ->
+		log "Got here"
+
+	name: orm.Value ( _name ) ->
+		if not _name
+			return @_name
+		@_name = _name
 
 	set_age: ( @age, _r_type=null ) ->
 		if _r_type
@@ -25,6 +29,7 @@ server = new orm.Server "http://localhost:5984/", "orm"
 orm.Base.prototype.Server = server
 
 rob = new Person "Rob"
+rob.name = "foo"
 
 Person.find_one { "name": "Rob" }, ( err, res ) ->
 	log "Error is " + util.inspect err

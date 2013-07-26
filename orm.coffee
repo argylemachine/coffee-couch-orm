@@ -243,6 +243,17 @@ class Base
 		_return
 
 	@delete: ( ) ->
+
+
+Value = ( func ) ->
+	@_func = func
+
+Value::get = ( ) ->
+	@_func( )
+
+Value::set = ( o ) ->
+	@_func( o )
 		
 exports.Server	= Server
 exports.Base	= Base
+exports.Value	= Value
