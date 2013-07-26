@@ -234,26 +234,28 @@ class Base
 		_return = { }
 
 		# Iterate over the class definition since 
-		for key, value of (@) when key.charAt( 0 ) isnt "_" and typeof( @[key] ) isnt 'function'
+		for key, value of (@) when key.charAt( 0 ) isnt "_" and typeof( @[key] ) is 'function'
 			_return[key] = @[key]
 
-		for key, value of (@::) when key.charAt( 0 ) isnt "_" and typeof( @::[key] ) isnt 'function' and not key in _hidden_functions
+		for key, value of (@::) when key.charAt( 0 ) isnt "_" and typeof( @::[key] ) is 'function' and not key in _hidden_functions
 			_return[key] = @::[key]
 
 		_return
 
 	@delete: ( ) ->
 
+Value = ( @o ) ->
+	log "Constructor for value"
+	
 
-Value = ( func ) ->
-	@_func = func
+Value.get = ( ) ->
+	@o
 
-Value::get = ( ) ->
-	@_func( )
+Value.set = ( @o ) ->
+	log "Setter of value."
+	process.exit 1
 
-Value::set = ( o ) ->
-	@_func( o )
-		
+	
 exports.Server	= Server
 exports.Base	= Base
 exports.Value	= Value
