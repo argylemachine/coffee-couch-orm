@@ -84,17 +84,14 @@ class Server
 
 	view: ( design_name, view, cb ) ->
 		# Just a helper to wrap a doc request really.
-		@doc @_url + @db + "/_design/" + design_name + "/_view/" + view, cb
+		@doc "_design/" + design_name + "/_view/" + view, cb
 
 class Base
 	_hidden_functions	= [ "constructor", "Server" ]
 
 	@find: ( filter, cb ) ->
 		that = @
-		log "age is of type '" + typeof that::age + "'"
 		@ensure_views ( err ) ->
-
-			log "age is of type '" + typeof that::age + "'"
 
 			if err
 				return cb err
@@ -105,19 +102,12 @@ class Base
 			if filter_keys.length is 0
 				return cb "Filter required."
 			
-			# Make sure filter contains at least one key / value pair of a valid index.
-			# Do this by iterating over all the filter keys specified and checking if it
-			# exists in spec.
-			log "Got to find.. Name is '#{that.name}'"
-			log that::
-			k = that.spec( )
-			log k
-			process.exit 1
-			_spec = that.spec( )
-			diff = [ key for key in filter_keys when _spec[key]? ]
-
-			log diff
-			process.exit 1
+			# Determine if a valid filter has been specified..
+			diff	= [ ]
+			_spec	= that.spec( )
+			for filter_key in filter_keys
+				if _spec[filter_key]?
+					diff.push filter_key
 			
 			# Force a valid filter to have been specified.
 			if diff.length is 0
@@ -128,7 +118,7 @@ class Base
 			# more views and such.
 			
 			# Make the query for the view.
-			@::Server.view @name, diff[0], ( err, res ) ->
+			that::Server.view that.name, "by-" + diff[0], ( err, res ) ->
 				if err
 					return cb err
 				return cb null, res
@@ -178,7 +168,6 @@ class Base
 	@ensure_views: ( cb ) ->
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
 		that = @
-		log "This is ensure views: " + typeof that::age
 		@::Server.doc "_design/" + @name, ( err, doc ) ->
 			if err
 				# Make all of them..
@@ -202,7 +191,6 @@ class Base
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
 				
-				log "This is ensure_views just entering else: " + typeof that::age
 
 				# Iterate over all the keys that should exist..
 				for key,value of that.spec( )
@@ -215,7 +203,6 @@ class Base
 					if to_check not in existing_views
 						to_generate[key] = value
 
-				log "This is ensure_views lower down ( else ) : " + typeof that::age
 
 				# Exit out here if we have all the views we should in the design document already.
 				if Object.keys( to_generate ).length is 0
