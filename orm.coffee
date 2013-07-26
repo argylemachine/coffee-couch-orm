@@ -89,6 +89,12 @@ class Server
 class Base
 	_hidden_functions	= [ "constructor", "Server" ]
 
+	constructor: ( ) ->
+		log "DIE"
+		log @
+		#log @spec( )
+		process.exit 1
+
 	@find: ( filter, cb ) ->
 		that = @
 		@ensure_views ( err ) ->
@@ -234,11 +240,9 @@ class Base
 		for key, value of (@::) when key.charAt( 0 ) isnt "_" and typeof( @::[key] ) isnt 'function' and not key in _hidden_functions
 			_return[key] = @::[key]
 
-		log _return
 		_return
 
 	@delete: ( ) ->
 		
-
 exports.Server	= Server
 exports.Base	= Base

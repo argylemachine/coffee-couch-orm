@@ -4,11 +4,13 @@ orm	= require "./orm"
 
 class Person extends orm.Base
 
-	@fname	= "meh"
+	@fname	= "foo"
 	@age	= "number"
 	@foo	= "number"
 
 	constructor: ( @fname ) ->
+		orm.Base.constructor( null )
+		log "wh?"
 
 	set_age: ( @age, _r_type=null ) ->
 		if _r_type
