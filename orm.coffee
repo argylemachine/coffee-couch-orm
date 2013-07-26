@@ -2,6 +2,7 @@ async	= require "async"
 log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
+util	= require "util"
 
 class Server
 	constructor: ( @_url, @db ) ->
@@ -14,7 +15,6 @@ class Server
 		# Creates a database..
 
 	_get: ( _url, cb ) ->
-		log _url
 		# Just wraps http.get to make it a little easier.
 		http.get _url, ( res ) ->
 			res.setEncoding "utf8"
@@ -88,18 +88,63 @@ class Server
 
 class Base
 	_hidden_functions	= [ "constructor", "Server" ]
-	_default_views		= { "all": "placeholder" }
 
-	@find_all: ( filter, cb ) ->
+	@find: ( filter, cb ) ->
+		k = @spec( )
+		log k
+		#process.exit 1
 		@ensure_views ( err ) =>
+			k = @spec( )
+			log k
+			process.exit 1
 			if err
 				return cb err
 
-			# At this point make a request based on the filter..
-			@::Server.view @name, "all", ( err, res ) ->
+			filter_keys = Object.keys filter
+
+			# If no filter was specified return back an error..
+			if filter_keys.length is 0
+				return cb "Filter required."
+			
+			# Make sure filter contains at least one key / value pair of a valid index.
+			# Do this by iterating over all the filter keys specified and checking if it
+			# exists in spec.
+			diff = [ key for key in filter_keys when _spec[key]? ]
+			
+			# Force a valid filter to have been specified.
+			if diff.length is 0
+				return cb "Invalid filter"
+
+			# Use the first filter as the index at this point..
+			# TODO add multiple filters in the query.. may not be easy without adding
+			# more views and such.
+			
+			# Make the query for the view.
+			@::Server.view @name, diff[0], ( err, res ) ->
 				if err
 					return cb err
 				return cb null, res
+
+	@find_one: ( filter, cb ) ->
+		# Very similar to @find.. just only returns a single document.
+		# Returns an error if the filter matches more than one document.
+		@find filter, ( err, res ) ->
+
+			# Error out if we got an error on the find.
+			if err
+				return cb err
+
+			# Error out if there was more than one result.
+			if res.length > 1
+				return cb "More than one document found."
+
+			# Return a valid result if length is simply 1.
+			if res.length is 1
+				return cb null, res[0]
+			
+			# Simply return null back if nothing was found.
+			if res.length < 1
+				return cb null, null
 
 	@generate_views: ( spec, cb ) ->
 		# Generate the views for the given spec.
@@ -108,19 +153,6 @@ class Base
 
 		# iterate over all the attributes..
 		for key, value of spec
-
-			if key in _default_views
-				if key is "all"
-					_r["all"] = { "map":	"""
-								function( doc ){
-									// Make sure we only match the correct documents..
-									if( doc._type == "#{@name}" ){
-										emit( null, doc );
-									}
-								}
-								""" }
-				continue
-				
 
 			# Define a by-xxx view that is fairly simple.
 			view_name = "by-" + key
@@ -136,7 +168,6 @@ class Base
 		cb null, _r
 
 	@ensure_views: ( cb ) ->
-
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
 		@::Server.doc "_design/" + @name, ( err, doc ) =>
 			if err
@@ -157,17 +188,12 @@ class Base
 						return cb null
 			else
 				# Figure out what views we will need to generate ( if any ).
-				log "Found design doc"
 
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
 
-				log @valid_views( )
-
 				# Iterate over all the keys that should exist..
-				for key of @valid_views( )
-
-					# If the key doesn't exist in the document we just pulled, shove it into to_generate.
+				for key of @spec( )
 					if not key in existing_views
 						to_generate[key] = value
 
@@ -197,17 +223,6 @@ class Base
 		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
 			_return[key] = typeof @::[key]( null, true )
 		_return
-
-	@valid_views: ( ) ->
-
-		# Get the spec of the class as a starting point.
-		_r = @spec( )
-
-		# Add in the default views that are defined in the base.
-		for name, data of _default_views
-			_r[name] = data
-
-		_r
 
 	@delete: ( ) ->
 		
