@@ -238,11 +238,9 @@ class Base
 						return cb null
 
 	@spec: ( ) ->
-		log "This is spec: " + typeof @::age
 		_return = { }
 		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
 			_return[key] = typeof @::[key]( null, true )
-		log "This is spec 2: " + typeof @::age
 		_return
 
 	@delete: ( ) ->

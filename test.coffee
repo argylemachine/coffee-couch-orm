@@ -4,15 +4,15 @@ orm	= require "./orm"
 
 class Person extends orm.Base
 
-	name: ( @name, _r_type=null ) ->
+	name: ( @_name, _r_type=null ) ->
 		if _r_type
 			return ""
-		@name
+		@_name
 	
-	age: ( @age, _r_type=null ) ->
+	age: ( @_age, _r_type=null ) ->
 		if _r_type
 			return 0
-		@age
+		@_age
 
 	_some_thing: ( foo ) ->
 		"bar"
