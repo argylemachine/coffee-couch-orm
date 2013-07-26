@@ -247,7 +247,6 @@ class Base
 Value = ( @o ) ->
 	log "Constructor for value"
 	
-
 Value.get = ( ) ->
 	@o
 

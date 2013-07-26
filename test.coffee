@@ -5,10 +5,11 @@ orm	= require "./orm"
 class Person extends orm.Base
 
 	constructor: ( @name, @age ) ->
+		log @
 
-	name: new orm.Value
+	name: new orm.Value( )
 	
-	age: new orm.Value
+	age: new orm.Value( )
 
 	_some_thing: ( foo ) ->
 		"bar"
