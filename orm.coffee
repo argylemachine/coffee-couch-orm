@@ -104,6 +104,11 @@ class Base
 			# Make sure filter contains at least one key / value pair of a valid index.
 			# Do this by iterating over all the filter keys specified and checking if it
 			# exists in spec.
+			log "HI"
+			log that.name
+			k = that.spec( )
+			log k
+			process.exit 1
 			_spec = that.spec( )
 			diff = [ key for key in filter_keys when _spec[key]? ]
 
