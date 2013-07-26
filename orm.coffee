@@ -90,13 +90,7 @@ class Base
 	_hidden_functions	= [ "constructor", "Server" ]
 
 	@find: ( filter, cb ) ->
-		k = @spec( )
-		log k
-		#process.exit 1
 		@ensure_views ( err ) =>
-			k = @spec( )
-			log k
-			process.exit 1
 			if err
 				return cb err
 
@@ -109,6 +103,7 @@ class Base
 			# Make sure filter contains at least one key / value pair of a valid index.
 			# Do this by iterating over all the filter keys specified and checking if it
 			# exists in spec.
+			_spec = @spec( )
 			diff = [ key for key in filter_keys when _spec[key]? ]
 			
 			# Force a valid filter to have been specified.
@@ -169,7 +164,7 @@ class Base
 
 	@ensure_views: ( cb ) ->
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
-		@::Server.doc "_design/" + @name, ( err, doc ) =>
+		@::Server.doc "_design/" + @name, ( err, doc ) ->
 			if err
 				# Make all of them..
 				_new_doc = { "language": "javascript", "views": { } }
