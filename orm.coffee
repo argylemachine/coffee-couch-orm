@@ -91,7 +91,11 @@ class Base
 
 	@find: ( filter, cb ) ->
 		that = @
+		log "age is of type '" + typeof that::age + "'"
 		@ensure_views ( err ) ->
+
+			log "age is of type '" + typeof that::age + "'"
+
 			if err
 				return cb err
 
@@ -104,8 +108,8 @@ class Base
 			# Make sure filter contains at least one key / value pair of a valid index.
 			# Do this by iterating over all the filter keys specified and checking if it
 			# exists in spec.
-			log "HI"
-			log that.name
+			log "Got to find.. Name is '#{that.name}'"
+			log that::
 			k = that.spec( )
 			log k
 			process.exit 1
@@ -174,6 +178,7 @@ class Base
 	@ensure_views: ( cb ) ->
 		# Make a query for the design document. If we can't get that, we know we need to create all the views.
 		that = @
+		log "This is ensure views: " + typeof that::age
 		@::Server.doc "_design/" + @name, ( err, doc ) ->
 			if err
 				# Make all of them..
@@ -196,6 +201,8 @@ class Base
 
 				to_generate	= { }
 				existing_views	= Object.keys doc.views
+				
+				log "This is ensure_views just entering else: " + typeof that::age
 
 				# Iterate over all the keys that should exist..
 				for key,value of that.spec( )
@@ -207,6 +214,8 @@ class Base
 					# If that view isn't defined in the design doc, include it in to_generate.
 					if to_check not in existing_views
 						to_generate[key] = value
+
+				log "This is ensure_views lower down ( else ) : " + typeof that::age
 
 				# Exit out here if we have all the views we should in the design document already.
 				if Object.keys( to_generate ).length is 0
@@ -229,9 +238,11 @@ class Base
 						return cb null
 
 	@spec: ( ) ->
+		log "This is spec: " + typeof @::age
 		_return = { }
 		for key, value of (@::) when ( key not in _hidden_functions and key.charAt( 0 ) isnt "_" )
 			_return[key] = typeof @::[key]( null, true )
+		log "This is spec 2: " + typeof @::age
 		_return
 
 	@delete: ( ) ->

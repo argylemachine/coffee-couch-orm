@@ -26,3 +26,4 @@ rob = new Person "Rob"
 Person.find_one { "name": "Rob" }, ( err, res ) ->
 	log "Error is " + util.inspect err
 	log "Res is " + res
+	log rob
