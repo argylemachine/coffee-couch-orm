@@ -9,7 +9,14 @@ class Base
 	get_attributes: ( ) ->
 		_ret = [ ]
 		for key, value of (@) when typeof @[key] is "function"
-			# Make sure key is function..
-			log "Key is '#{key}' and value is '#{value}'"
+			str_value = String value
+
+			# Search value for /this\./ ..
+			reg = /this\.[A-Za-z_]*/g
+			
+			matches = str_value.match reg
+			log matches
+
+		_ret
 
 exports.Base	= Base
