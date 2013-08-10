@@ -19,4 +19,5 @@ class Person extends orm.Base
 rob = new Person "rob", 22
 rob.set_helpers( )
 
-log rob
+log rob.first_name
+rob.first_name = "Robert"

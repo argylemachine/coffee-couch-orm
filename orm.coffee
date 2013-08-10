@@ -80,18 +80,27 @@ class Base
 		
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
+			
+			# Note that we grab the current value of the attribute so that we don't lose any data that may exist from a constructor.
+			_current_attribute_value = @[attribute]
+
 			@.__defineGetter__ attribute, @_generate_getter attribute
 			@.__defineSetter__ attribute, @_generate_setter attribute
+			
+			# Set the attribute back to its state before the getter/setter.
+			@[attribute] = _current_attribute_value
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) ->
-			@Server.get( _id )[attr]
+			log "I got a getter request for #{attr}"
+			@["_"+attr]
 		k
 
 	_generate_setter: ( attr ) ->
 		k = ( val ) ->
-			@Server.update( _id, attr, val )
+			log "I Got a setter request for #{attr}: #{val}"
+			@["_"+attr] = val
 		k
 
 exports.Base	= Base
