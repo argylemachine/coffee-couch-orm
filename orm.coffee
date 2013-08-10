@@ -47,19 +47,29 @@ class Base
 			str_value = String value
 
 			# Search value for instance objects..
-			reg = /this\.[A-Za-z_]*/g
+			# Note the space at the end, this is so that we get attributes not functions..
+			# At a later point this may need to be expanded as overwriting functions could happen in child class.
+			reg = /this\.[A-Za-z_]* /g
 			
 			matches = str_value.match reg
 
 			if not matches
 				continue
 
+			# Parse matches to remove the 'this.' prefix, and trim it.
+			_matches = [ ]
+			for match in matches
+				_matches.push match.substring( 5 ).trim( )
+
+			matches = _matches
+
 			for match in matches when match not in _ret
-				_ret.push match
+				_ret.push match 
 		_ret
 
 	get_helpers: ( ) ->
 		for attribute in @get_attributes( )
 			log "Got attribute of #{attribute}"
 		null
+
 exports.Base	= Base
