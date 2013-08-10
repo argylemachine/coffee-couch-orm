@@ -68,8 +68,16 @@ class Base
 		_ret
 
 	get_helpers: ( ) ->
+		_ret = [ ]
 		for attribute in @get_attributes( )
-			log "Got attribute of #{attribute}"
+			_ret.push @_generate_getter attribute
+			_ret.push @_generate_setter attribute
 		null
+
+	_generate_getter: ( attr ) ->
+		# Helper function that generates a getter function for the attribute that is passed in.
+		
+	_generate_setter: ( attr ) ->
+		
 
 exports.Base	= Base
