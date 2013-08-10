@@ -9,5 +9,11 @@ class Person extends orm.Base
 	say_hi: ( ) ->
 		"Hi " + @first_name + ", you're " + @age
 
+	something_else: ( ) ->
+		@hi = "bar"
+
+	_hidden_func: ( ) ->
+		@meh = "fo"
+		"Do something funky."
 
 log Person.prototype.get_attributes( )
