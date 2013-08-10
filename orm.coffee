@@ -15,8 +15,12 @@ class Base
 			reg = /this\.[A-Za-z_]*/g
 			
 			matches = str_value.match reg
-			log matches
 
+			if not matches
+				continue
+
+			for match in matches when match not in _ret
+				_ret.push match
 		_ret
 
 exports.Base	= Base
