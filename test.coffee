@@ -1,5 +1,6 @@
 log	= require( "logging" ).from __filename
 orm	= require "./orm"
+util	= require "util"
 
 class Person extends orm.Base
 
@@ -15,5 +16,7 @@ class Person extends orm.Base
 		@meh = "fo"
 		"Do something funky."
 
-log Person.prototype.get_attributes( )
-log Person.prototype.get_helpers( )
+rob = new Person "rob", 22
+rob.set_helpers( )
+
+log rob

@@ -76,22 +76,22 @@ class Base
 				_ret.push match 
 		_ret
 
-	get_helpers: ( ) ->
-		_ret = [ ]
+	set_helpers: ( ) ->
+		
+		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
-			_ret.push @_generate_getter attribute
-			_ret.push @_generate_setter attribute
-		null
+			@.__defineGetter__ attribute, @_generate_getter attribute
+			@.__defineSetter__ attribute, @_generate_setter attribute
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) ->
-			@server.get( _id )[attr]
+			@Server.get( _id )[attr]
 		k
 
 	_generate_setter: ( attr ) ->
 		k = ( val ) ->
-			@server.update( _id, attr, val )
+			@Server.update( _id, attr, val )
 		k
 
 exports.Base	= Base
