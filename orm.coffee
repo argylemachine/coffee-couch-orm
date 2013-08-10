@@ -41,10 +41,6 @@ class Server
 		
 class Base
 
-	debug: ( ) ->
-		log "Got here"
-		log @
-
 	get_attributes: ( ) ->
 		_ret = [ ]
 		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" )
@@ -62,4 +58,8 @@ class Base
 				_ret.push match
 		_ret
 
+	make_helpers: ( ) ->
+		for attribute in @get_attributes( )
+			log "Got attribute of #{attribute}"
+		null
 exports.Base	= Base
