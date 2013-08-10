@@ -16,4 +16,4 @@ class Person extends orm.Base
 		"Do something funky."
 
 log Person.prototype.get_attributes( )
-log Person.prototype.make_helpers( )
+log Person.prototype.get_helpers( )

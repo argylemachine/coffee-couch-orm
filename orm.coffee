@@ -58,7 +58,7 @@ class Base
 				_ret.push match
 		_ret
 
-	make_helpers: ( ) ->
+	get_helpers: ( ) ->
 		for attribute in @get_attributes( )
 			log "Got attribute of #{attribute}"
 		null
