@@ -1,4 +1,3 @@
-util	= require "util"
 log	= require( "logging" ).from __filename
 orm	= require "./orm"
 
