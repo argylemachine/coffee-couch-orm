@@ -15,7 +15,7 @@ class Server
 			cb	= method
 			method	= "GET"
 
-		_opts = url.parse @url + @db + @path
+		_opts = url.parse @url + @db + "/" + @path
 		_opts["method"] = method
 		if content_type
 			_opts["headers"]			= { }
@@ -32,22 +32,42 @@ class Server
 			res.on "end", ( ) ->
 				try
 					_obj = JSON.parse chunk
-					cb _obj
+					cb null, _obj
 				catch err
-					cb { "error": err }
+					cb err
 			
 		req.on "error", ( err ) ->
-			cb { "error": err }
+			cb err
 
-	update: ( _id, attr, val ) ->
+	update: ( _id, attr, val, cb ) ->
 		# Update the document _id by setting the attribute 'attr' to 'val'.
-		# Get the current document
-		# modify it
-		# send it back.
 
-	get: ( _id ) ->
+		# Get the current document
+		@get _id, ( err, doc ) ->
+			if err
+				return cb err
+
+			# Set the attribute to be the value we got.
+			doc[attr] = val
+
+			# Set the document back on the server.
+			@set _id, doc, ( err, res ) ->
+				if err
+					return cb err
+				cb null
+
+	get: ( _id, cb ) ->
 		# Get a particular document.
-		
+		_req _id, ( err, doc ) ->
+			if err
+				return cb err
+			cb null, doc
+
+	set: ( _id, doc, cb ) ->
+		# Set the particular document with ID _id to be doc.
+		# Mainly a wrapper for a PUT request with specific content type.
+		_req _id, "PUT", doc, "text/json", cb
+
 class Base
 
 	get_attributes: ( ) ->
@@ -93,13 +113,11 @@ class Base
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) ->
-			log "I got a getter request for #{attr}"
 			@["_"+attr]
 		k
 
 	_generate_setter: ( attr ) ->
 		k = ( val ) ->
-			log "I Got a setter request for #{attr}: #{val}"
 			@["_"+attr] = val
 		k
 
