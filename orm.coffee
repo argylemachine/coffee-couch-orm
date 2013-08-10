@@ -38,6 +38,15 @@ class Server
 			
 		req.on "error", ( err ) ->
 			cb { "error": err }
+
+	update: ( _id, attr, val ) ->
+		# Update the document _id by setting the attribute 'attr' to 'val'.
+		# Get the current document
+		# modify it
+		# send it back.
+
+	get: ( _id ) ->
+		# Get a particular document.
 		
 class Base
 
@@ -76,8 +85,13 @@ class Base
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
-		
+		k = ( ) ->
+			@server.get( _id )[attr]
+		k
+
 	_generate_setter: ( attr ) ->
-		
+		k = ( val ) ->
+			@server.update( _id, attr, val )
+		k
 
 exports.Base	= Base
