@@ -102,7 +102,10 @@ class Base extends events.EventEmitter
 				@_id = res['id']
 
 				# Call set_helpers
-				@set_helpers( )
+				@set_helpers ( ) =>
+					log "FOOBAR"
+					log @
+					@emit "ready"
 
 			return
 
@@ -110,7 +113,8 @@ class Base extends events.EventEmitter
 		@_id = _id
 
 		# Call set_helpers..
-		@set_helpers( )
+		@set_helpers ( ) =>
+			@emit "ready"
 		
 	get_attributes: ( ) ->
 		_ret = [ ]
@@ -138,7 +142,7 @@ class Base extends events.EventEmitter
 				_ret.push match 
 		_ret
 
-	set_helpers: ( ) ->
+	set_helpers: ( cb ) ->
 
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
@@ -151,6 +155,8 @@ class Base extends events.EventEmitter
 			
 			# Set the attribute back to its state before the getter/setter.
 			@[attribute] = _current_attribute_value
+
+		cb( )
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.

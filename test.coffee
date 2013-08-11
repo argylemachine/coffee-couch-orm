@@ -24,6 +24,8 @@ rob = new Person "rob", 22
 
 rob.once "ready", ( ) ->
 
+	log "GOT HERE"
+
 	log rob.first_name
 	rob.first_name = "Robert"
 	log rob.first_name
