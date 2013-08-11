@@ -21,3 +21,4 @@ rob.set_helpers( )
 
 log rob.first_name
 rob.first_name = "Robert"
+log rob.first_name

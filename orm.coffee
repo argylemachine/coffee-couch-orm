@@ -15,6 +15,8 @@ class Server
 			cb	= method
 			method	= "GET"
 
+		log "Got request for #{path} - #{methd}."
+
 		_opts = url.parse @url + @db + "/" + @path
 		_opts["method"] = method
 		if content_type
@@ -113,7 +115,24 @@ class Base
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) ->
+
+			# Set the local variable 
 			@["_"+attr]
+
+			# Make the async request to update the local variable.
+			@Server.get @_id, ( err, doc ) ->
+
+				# If we get an error, simply set the attribute to undefined
+				# and return back.
+				if err 
+					@["_"+attr] = undefined
+					return
+
+				# Wrap this in a try because the doc may not have that attribute anymore.
+				try
+					@["_"+attr] = doc[attr]
+				catch
+					@["_"+attr] = undefined
 		k
 
 	_generate_setter: ( attr ) ->
