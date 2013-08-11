@@ -98,8 +98,6 @@ class Base extends events.EventEmitter
 				if err
 					return log err
 
-				log res
-
 				# Set the id to be instance wide.
 				@_id = res['id']
 
@@ -142,7 +140,6 @@ class Base extends events.EventEmitter
 
 	set_helpers: ( ) ->
 
-		log "Got to set helpers.. id is #{@_id}"
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
 			
@@ -157,7 +154,7 @@ class Base extends events.EventEmitter
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
-		k = ( ) ->
+		k = ( ) =>
 
 			# Set the local variable 
 			@["_"+attr]
@@ -181,6 +178,12 @@ class Base extends events.EventEmitter
 	_generate_setter: ( attr ) ->
 		k = ( val ) ->
 			@["_"+attr] = val
+
+			# Make an async call to update the server.. 
+			@Server.update @_id, attr, val, ( err ) ->
+				if err
+					log "Unable to update the attribute #{attr} for id #{@_id}: #{err}"
+		
 		k
 
 exports.Base	= Base
