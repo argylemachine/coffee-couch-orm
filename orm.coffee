@@ -15,9 +15,11 @@ class Server
 			cb	= method
 			method	= "GET"
 
-		log "Got request for #{path} - #{methd}."
+		_url = @url + @db + "/" + path
 
-		_opts = url.parse @url + @db + "/" + @path
+		log "Got request (#{method}) for #{_url}."
+
+		_opts = url.parse _url
 		_opts["method"] = method
 		if content_type
 			_opts["headers"]			= { }
@@ -60,7 +62,7 @@ class Server
 
 	get: ( _id, cb ) ->
 		# Get a particular document.
-		_req _id, ( err, doc ) ->
+		@req _id, ( err, doc ) ->
 			if err
 				return cb err
 			cb null, doc
@@ -68,9 +70,13 @@ class Server
 	set: ( _id, doc, cb ) ->
 		# Set the particular document with ID _id to be doc.
 		# Mainly a wrapper for a PUT request with specific content type.
-		_req _id, "PUT", doc, "text/json", cb
+		@req _id, "PUT", doc, "text/json", cb
 
 class Base
+
+	constructor: ( ) ->
+		# Do the initial document creation here.
+		# This will have the server generate a UID for us that we can store in @_id.
 
 	get_attributes: ( ) ->
 		_ret = [ ]
@@ -141,3 +147,4 @@ class Base
 		k
 
 exports.Base	= Base
+exports.Server	= Server
