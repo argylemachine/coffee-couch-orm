@@ -37,6 +37,8 @@ class Server
 			res.on "end", ( ) ->
 				try
 					_obj = JSON.parse _r
+					if 'error' in _obj
+						return cb _obj['error']
 					cb null, _obj
 				catch err
 					cb err
@@ -90,11 +92,13 @@ class Base extends events.EventEmitter
 		# If no document id was specified, then make a post request
 		# to the server to request one.
 		if not _id
-			@Server.post { }, ( err, res ) ->
+			@Server.post { }, ( err, res ) =>
 				
 				# If we error out at this stage things aren't good!
 				if err
 					return log err
+
+				log res
 
 				# Set the id to be instance wide.
 				@_id = res['id']
@@ -138,9 +142,7 @@ class Base extends events.EventEmitter
 
 	set_helpers: ( ) ->
 
-		# Check if @_id is set.. 
-		
-		
+		log "Got to set helpers.. id is #{@_id}"
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
 			
