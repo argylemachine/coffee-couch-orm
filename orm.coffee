@@ -72,11 +72,17 @@ class Server
 		# Mainly a wrapper for a PUT request with specific content type.
 		@req _id, "PUT", doc, "text/json", cb
 
+	post: ( doc, cb ) ->
+		# Helper to post a new document to the couchdb server.
+		@req "", "POST", JSON.stringify( doc ), "application/json", cb
+
 class Base
 
 	constructor: ( ) ->
-		# Do the initial document creation here.
+		# Do the initial document creation here. ( Empty document ).
 		# This will have the server generate a UID for us that we can store in @_id.
+		@Server.post { }, ( err, res ) ->
+			@_id = res['id']
 
 	get_attributes: ( ) ->
 		_ret = [ ]
