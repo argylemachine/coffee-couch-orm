@@ -119,6 +119,10 @@ class Base extends events.EventEmitter
 	get_attributes: ( ) ->
 		_ret = [ ]
 		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" )
+
+			# Skip any functions which are actually part of parents.. ie this orm.Base class or events.EventEmitter..
+			#TODO
+			
 			str_value = String value
 
 			# Search value for instance objects..
@@ -140,6 +144,7 @@ class Base extends events.EventEmitter
 
 			for match in matches when match not in _ret
 				_ret.push match 
+		
 		_ret
 
 	set_helpers: ( cb ) ->
