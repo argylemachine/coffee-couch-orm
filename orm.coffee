@@ -37,7 +37,7 @@ class Server
 			res.on "end", ( ) ->
 				try
 					_obj = JSON.parse _r
-					if 'error' in _obj
+					if 'error' of _obj
 						return cb _obj['error']
 					cb null, _obj
 				catch err
