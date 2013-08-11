@@ -1,6 +1,7 @@
 log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
+events	= require "events"
 
 class Server
 
@@ -17,7 +18,7 @@ class Server
 
 		_url = @url + @db + "/" + path
 
-		log "Got request (#{method}) for #{_url}."
+		log "Request: (#{method}) #{_url}."
 
 		_opts = url.parse _url
 		_opts["method"] = method
@@ -35,13 +36,19 @@ class Server
 			
 			res.on "end", ( ) ->
 				try
-					_obj = JSON.parse chunk
+					_obj = JSON.parse _r
 					cb null, _obj
 				catch err
 					cb err
 			
 		req.on "error", ( err ) ->
 			cb err
+
+		# If there was data specified, write it out to the request.
+		if data
+			req.write data
+
+		req.end( )
 
 	update: ( _id, attr, val, cb ) ->
 		# Update the document _id by setting the attribute 'attr' to 'val'.
@@ -76,14 +83,33 @@ class Server
 		# Helper to post a new document to the couchdb server.
 		@req "", "POST", JSON.stringify( doc ), "application/json", cb
 
-class Base
+class Base extends events.EventEmitter
 
-	constructor: ( ) ->
-		# Do the initial document creation here. ( Empty document ).
-		# This will have the server generate a UID for us that we can store in @_id.
-		@Server.post { }, ( err, res ) ->
-			@_id = res['id']
+	constructor: ( _id ) ->
 
+		# If no document id was specified, then make a post request
+		# to the server to request one.
+		if not _id
+			@Server.post { }, ( err, res ) ->
+				
+				# If we error out at this stage things aren't good!
+				if err
+					return log err
+
+				# Set the id to be instance wide.
+				@_id = res['id']
+
+				# Call set_helpers
+				@set_helpers( )
+
+			return
+
+		# Set the id that was specified instance wide.
+		@_id = _id
+
+		# Call set_helpers..
+		@set_helpers( )
+		
 	get_attributes: ( ) ->
 		_ret = [ ]
 		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" )
@@ -111,6 +137,9 @@ class Base
 		_ret
 
 	set_helpers: ( ) ->
+
+		# Check if @_id is set.. 
+		
 		
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
