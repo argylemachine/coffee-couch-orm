@@ -115,7 +115,7 @@ class Base extends events.EventEmitter
 				@_id = res['id']
 
 				# Call set_helpers
-				@set_helpers ( ) =>
+				@_set_helpers ( ) =>
 					# Emit that we're now ready - our helpers are defined and
 					# any changes that are made to the object will be reflected
 					# in the database.
@@ -127,13 +127,13 @@ class Base extends events.EventEmitter
 		@_id = _id
 
 		# Call set_helpers..
-		@set_helpers ( ) =>
+		@_set_helpers ( ) =>
 
 			# When set_helpers is done, we should notify everybody that we're ready
 			# to be used like any other object at this point.
 			@emit "ready"
 		
-	get_attributes: ( ) ->
+	_get_attributes: ( ) ->
 		_ret = [ ]
 
 		# Generate a list of functions to ignore when looking for attributes.
@@ -168,10 +168,10 @@ class Base extends events.EventEmitter
 
 		_ret
 
-	set_helpers: ( cb ) ->
+	_set_helpers: ( cb ) ->
 
 		# Iterate through all the attributes we shuld hook up with getters and setters.
-		for attribute in @get_attributes( )
+		for attribute in @_get_attributes( )
 			
 			# Keep the current value of the attribute as it is right now.
 			_val = @[attribute]
