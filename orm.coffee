@@ -102,6 +102,8 @@ class Base extends events.EventEmitter
 
 	constructor: ( _id ) ->
 
+		@_name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
+
 		# If no document id was specified, then make a post request
 		# to the server to request one.
 		if not _id
