@@ -2,6 +2,7 @@ log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
 events	= require "events"
+util	= require "util"
 
 class Server
 
@@ -10,15 +11,15 @@ class Server
 	req: ( path, method, data, content_type, cb ) ->
 
 		# Allow either all 5 or just 2
-		# * req /foo, "POST", "some data", "text/plain", ( ) ->
-		# * req /foo, ( ) ->
+		# * req foo, "POST", "some data", "text/plain", ( ) ->
+		# * req foo, ( ) ->
 		if not data and not content_type and not cb
 			cb	= method
 			method	= "GET"
 
 		_url = @url + @db + "/" + path
 
-		log "Request: (#{method}) #{_url}."
+		log "Request: (#{method}) #{_url}"
 
 		_opts = url.parse _url
 		_opts["method"] = method
@@ -103,8 +104,6 @@ class Base extends events.EventEmitter
 
 				# Call set_helpers
 				@set_helpers ( ) =>
-					log "FOOBAR"
-					log @
 					@emit "ready"
 
 			return
@@ -118,10 +117,14 @@ class Base extends events.EventEmitter
 		
 	get_attributes: ( ) ->
 		_ret = [ ]
-		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" )
 
-			# Skip any functions which are actually part of parents.. ie this orm.Base class or events.EventEmitter..
-			#TODO
+		# Generate a list of functions to ignore when looking for attributes.
+		# these will be functions that are defined in orm.Base and events.EventEmitter.
+		to_exclude = [ ]
+		for key, value of Base.prototype
+			to_exclude.push key
+
+		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" ) and key not in to_exclude
 			
 			str_value = String value
 
@@ -144,7 +147,7 @@ class Base extends events.EventEmitter
 
 			for match in matches when match not in _ret
 				_ret.push match 
-		
+
 		_ret
 
 	set_helpers: ( cb ) ->
