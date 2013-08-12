@@ -2,7 +2,6 @@ log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
 events	= require "events"
-util	= require "util"
 
 class Server
 
@@ -56,21 +55,29 @@ class Server
 	update: ( _id, attr, val, cb ) ->
 		# Update the document _id by setting the attribute 'attr' to 'val'.
 
-		# Get the current document
-		@get _id, ( err, doc ) =>
-			if err
-				return cb err
-
-			# Set the attribute to be the value we got.
-			doc[attr] = val
-
-			# Set the document back on the server.
-			@set _id, doc, ( err, res ) ->
-				log "Inside cb for update."
+		_try_update = ( doc ) =>
+			# Get the current document
+			@get _id, ( err, doc ) =>
 				if err
 					return cb err
 
-				cb null
+				# Set the attribute to be the value we got.
+				doc[attr] = val
+
+				# Set the document back on the server.
+				@set _id, doc, ( err, res ) ->
+		
+					# Recurse and try again if there was a conflict..
+					if err is 'conflict'
+						return _try_update( )
+
+					# If an error happened that wasn't a conflict..
+					if err
+						return cb err
+
+					# All is well.
+					cb null
+		_try_update( )
 
 	get: ( _id, cb ) ->
 		# Get a particular document.
@@ -176,9 +183,6 @@ class Base extends events.EventEmitter
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) =>
 
-			# Set the local variable 
-			@["_"+attr]
-
 			# Make the async request to update the local variable.
 			@Server.get @_id, ( err, doc ) ->
 
@@ -193,6 +197,8 @@ class Base extends events.EventEmitter
 					@["_"+attr] = doc[attr]
 				catch
 					@["_"+attr] = undefined
+
+			@["_"+attr]
 		k
 
 	_generate_setter: ( attr ) ->
@@ -200,7 +206,7 @@ class Base extends events.EventEmitter
 			@["_"+attr] = val
 
 			# Make an async call to update the server.. 
-			@Server.update @_id, attr, val, ( err ) ->
+			@Server.update @_id, attr, val, ( err ) =>
 				if err
 					log "Unable to update the attribute #{attr} for id #{@_id}: #{err}"
 		
