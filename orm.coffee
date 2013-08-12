@@ -134,11 +134,9 @@ class Base extends events.EventEmitter
 			# Search value for instance objects..
 			# Note the space at the end, this is so that we get attributes not functions..
 			# At a later point this may need to be expanded as overwriting functions could happen in child class.
-			reg = /this\.[A-Za-z_]* /g
+			reg = /this\.[A-Za-z_]*(?!\\\()/g
 			
 			matches = str_value.match reg
-
-			log "Key is '#{key}' and matches are '#{matches}'"
 
 			if not matches
 				continue
