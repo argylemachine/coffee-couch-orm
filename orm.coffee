@@ -155,14 +155,12 @@ class Base extends events.EventEmitter
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
 			
-			# Note that we grab the current value of the attribute so that we don't lose any data that may exist from a constructor.
-			_current_attribute_value = @[attribute]
+			# Set the 'hidden' attribute that the getters and setters use to be the value
+			# of the current attribute. This way the contents doesn't get overwritten at a later point
+			@["_"+attribute] = @[attribute]
 
 			@.__defineGetter__ attribute, @_generate_getter attribute
 			@.__defineSetter__ attribute, @_generate_setter attribute
-			
-			# Set the attribute back to its state before the getter/setter.
-			@[attribute] = _current_attribute_value
 
 		cb( )
 
