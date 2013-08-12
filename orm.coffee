@@ -104,6 +104,9 @@ class Base extends events.EventEmitter
 
 				# Call set_helpers
 				@set_helpers ( ) =>
+					# Emit that we're now ready - our helpers are defined and
+					# any changes that are made to the object will be reflected
+					# in the database.
 					@emit "ready"
 
 			return
@@ -135,6 +138,8 @@ class Base extends events.EventEmitter
 			
 			matches = str_value.match reg
 
+			log "Key is '#{key}' and matches are '#{matches}'"
+
 			if not matches
 				continue
 
@@ -148,7 +153,6 @@ class Base extends events.EventEmitter
 			for match in matches when match not in _ret
 				_ret.push match 
 
-		log "RET IS #{_ret}"
 		_ret
 
 	set_helpers: ( cb ) ->
