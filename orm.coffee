@@ -148,6 +148,7 @@ class Base extends events.EventEmitter
 			for match in matches when match not in _ret
 				_ret.push match 
 
+		log "RET IS #{_ret}"
 		_ret
 
 	set_helpers: ( cb ) ->
@@ -155,13 +156,16 @@ class Base extends events.EventEmitter
 		# Iterate through all the attributes we shuld hook up with getters and setters.
 		for attribute in @get_attributes( )
 			
-			# Set the 'hidden' attribute that the getters and setters use to be the value
-			# of the current attribute. This way the contents doesn't get overwritten at a later point
-			@["_"+attribute] = @[attribute]
+			# Keep the current value of the attribute as it is right now.
+			_val = @[attribute]
 
+			# Define the getters and setters for the attribute.
 			@.__defineGetter__ attribute, @_generate_getter attribute
 			@.__defineSetter__ attribute, @_generate_setter attribute
 
+			# Set the attribute value back. Note that this will run through the
+			# setter that we just defined.
+			@[attribute] = _val
 		cb( )
 
 	_generate_getter: ( attr ) ->
