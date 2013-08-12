@@ -47,7 +47,6 @@ class Server
 
 			# Recurse if we got an ECONNRESET
 			if err.code is 'ECONNRESET'
-				log "Recursing.."
 				return @req path, method, data, content_type, cb
 
 			cb err
