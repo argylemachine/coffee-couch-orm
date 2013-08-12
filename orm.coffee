@@ -2,7 +2,6 @@ log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
 events	= require "events"
-util	= require "util"
 
 class Server
 
@@ -18,8 +17,6 @@ class Server
 			method	= "GET"
 
 		_url = @url + @db + "/" + path
-
-		log "Request: (#{method}) #{_url}"
 
 		_opts = url.parse _url
 		_opts["method"] = method
@@ -43,32 +40,47 @@ class Server
 					cb null, _obj
 				catch err
 					cb err
-			
-		req.on "error", ( err ) ->
+
+		req.on "error", ( err ) =>
+
+			# Recurse if we got an ECONNRESET
+			if err.code is 'ECONNRESET'
+				return @req path, method, data, content_type, cb
+
 			cb err
 
 		# If there was data specified, write it out to the request.
 		if data
-			req.write data
+			req.write JSON.stringify data
 
 		req.end( )
 
 	update: ( _id, attr, val, cb ) ->
 		# Update the document _id by setting the attribute 'attr' to 'val'.
 
-		# Get the current document
-		@get _id, ( err, doc ) ->
-			if err
-				return cb err
-
-			# Set the attribute to be the value we got.
-			doc[attr] = val
-
-			# Set the document back on the server.
-			@set _id, doc, ( err, res ) ->
+		_try_update = ( doc ) =>
+			# Get the current document
+			@get _id, ( err, doc ) =>
 				if err
 					return cb err
-				cb null
+
+				# Set the attribute to be the value we got.
+				doc[attr] = val
+
+				# Set the document back on the server.
+				@set _id, doc, ( err, res ) ->
+		
+					# Recurse and try again if there was a conflict..
+					if err is 'conflict'
+						return _try_update( )
+
+					# If an error happened that wasn't a conflict..
+					if err
+						return cb err
+
+					# All is well.
+					cb null
+		_try_update( )
 
 	get: ( _id, cb ) ->
 		# Get a particular document.
@@ -84,7 +96,7 @@ class Server
 
 	post: ( doc, cb ) ->
 		# Helper to post a new document to the couchdb server.
-		@req "", "POST", JSON.stringify( doc ), "application/json", cb
+		@req "", "POST", doc, "application/json", cb
 
 class Base extends events.EventEmitter
 
@@ -116,6 +128,9 @@ class Base extends events.EventEmitter
 
 		# Call set_helpers..
 		@set_helpers ( ) =>
+
+			# When set_helpers is done, we should notify everybody that we're ready
+			# to be used like any other object at this point.
 			@emit "ready"
 		
 	get_attributes: ( ) ->
@@ -134,11 +149,9 @@ class Base extends events.EventEmitter
 			# Search value for instance objects..
 			# Note the space at the end, this is so that we get attributes not functions..
 			# At a later point this may need to be expanded as overwriting functions could happen in child class.
-			reg = /this\.[A-Za-z_]* /g
+			reg = /this\.[A-Za-z_]*(?!\\\()/g
 			
 			matches = str_value.match reg
-
-			log "Key is '#{key}' and matches are '#{matches}'"
 
 			if not matches
 				continue
@@ -176,9 +189,6 @@ class Base extends events.EventEmitter
 		# Helper function that generates a getter function for the attribute that is passed in.
 		k = ( ) =>
 
-			# Set the local variable 
-			@["_"+attr]
-
 			# Make the async request to update the local variable.
 			@Server.get @_id, ( err, doc ) ->
 
@@ -193,6 +203,8 @@ class Base extends events.EventEmitter
 					@["_"+attr] = doc[attr]
 				catch
 					@["_"+attr] = undefined
+
+			@["_"+attr]
 		k
 
 	_generate_setter: ( attr ) ->
@@ -200,7 +212,7 @@ class Base extends events.EventEmitter
 			@["_"+attr] = val
 
 			# Make an async call to update the server.. 
-			@Server.update @_id, attr, val, ( err ) ->
+			@Server.update @_id, attr, val, ( err ) =>
 				if err
 					log "Unable to update the attribute #{attr} for id #{@_id}: #{err}"
 		
