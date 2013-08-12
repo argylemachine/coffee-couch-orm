@@ -43,13 +43,13 @@ class Server
 					cb null, _obj
 				catch err
 					cb err
-			
+
 		req.on "error", ( err ) ->
 			cb err
 
 		# If there was data specified, write it out to the request.
 		if data
-			req.write data
+			req.write JSON.stringify data
 
 		req.end( )
 
@@ -57,7 +57,7 @@ class Server
 		# Update the document _id by setting the attribute 'attr' to 'val'.
 
 		# Get the current document
-		@get _id, ( err, doc ) ->
+		@get _id, ( err, doc ) =>
 			if err
 				return cb err
 
@@ -66,8 +66,10 @@ class Server
 
 			# Set the document back on the server.
 			@set _id, doc, ( err, res ) ->
+				log "Inside cb for update."
 				if err
 					return cb err
+
 				cb null
 
 	get: ( _id, cb ) ->
@@ -84,7 +86,7 @@ class Server
 
 	post: ( doc, cb ) ->
 		# Helper to post a new document to the couchdb server.
-		@req "", "POST", JSON.stringify( doc ), "application/json", cb
+		@req "", "POST", doc, "application/json", cb
 
 class Base extends events.EventEmitter
 
