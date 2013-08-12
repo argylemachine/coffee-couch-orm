@@ -44,6 +44,8 @@ class Server
 					cb err
 
 		req.on "error", ( err ) ->
+			log "Caught error on req: #{err['stack']}"
+			log _opts
 			cb err
 
 		# If there was data specified, write it out to the request.
@@ -125,6 +127,9 @@ class Base extends events.EventEmitter
 
 		# Call set_helpers..
 		@set_helpers ( ) =>
+
+			# When set_helpers is done, we should notify everybody that we're ready
+			# to be used like any other object at this point.
 			@emit "ready"
 		
 	get_attributes: ( ) ->
