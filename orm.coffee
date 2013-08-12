@@ -132,6 +132,12 @@ class Base extends events.EventEmitter
 			# When set_helpers is done, we should notify everybody that we're ready
 			# to be used like any other object at this point.
 			@emit "ready"
+
+	find: ( filter ) ->
+		# Find any objects that match the given filter.
+		_ret = [ ]
+
+		_ret
 		
 	_get_attributes: ( ) ->
 		_ret = [ ]
