@@ -22,8 +22,14 @@ orm.Base.prototype.Server = new orm.Server "http://localhost:5984/", "orm"
 
 rob = new Person "rob", 22
 
-rob.set_helpers( )
+log rob
 
-log rob.first_name
-rob.first_name = "Robert"
-log rob.first_name
+rob.once "ready", ( ) ->
+
+	log "GOT HERE"
+	log rob
+###
+	log rob.first_name
+	rob.first_name = "Robert"
+	log rob.first_name
+###
