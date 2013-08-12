@@ -43,9 +43,13 @@ class Server
 				catch err
 					cb err
 
-		req.on "error", ( err ) ->
-			log "Caught error on req: #{err['stack']}"
-			log _opts
+		req.on "error", ( err ) =>
+
+			# Recurse if we got an ECONNRESET
+			if err.code is 'ECONNRESET'
+				log "Recursing.."
+				return @req path, method, data, content_type, cb
+
 			cb err
 
 		# If there was data specified, write it out to the request.
