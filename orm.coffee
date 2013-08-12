@@ -18,8 +18,6 @@ class Server
 
 		_url = @url + @db + "/" + path
 
-		log "Request: (#{method}) #{_url}"
-
 		_opts = url.parse _url
 		_opts["method"] = method
 		if content_type

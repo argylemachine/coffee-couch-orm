@@ -27,6 +27,3 @@ rob.once "ready", ( ) ->
 	log rob.first_name
 	rob.first_name = "Robert"
 	log rob.first_name
-	setTimeout ( ) ->
-		log "End!"
-	, 5000
