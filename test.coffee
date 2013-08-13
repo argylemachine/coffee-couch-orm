@@ -20,12 +20,8 @@ class Person extends orm.Base
 # Create a new instance of the server, and set the instance to be class wide. ( All instances of orm.Base ).
 orm.Base.prototype.Server = new orm.Server "http://localhost:5984/", "orm"
 
-rob = new Person "rob", 22
+rob = new Person "Rob", 22
 
 rob.once "ready", ( ) ->
-
-	log rob.first_name
-	rob.first_name = "Robert"
-	log rob.first_name
 
 	log rob

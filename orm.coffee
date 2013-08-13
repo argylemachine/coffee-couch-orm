@@ -102,7 +102,9 @@ class Base extends events.EventEmitter
 
 	constructor: ( _id ) ->
 
-		@_name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
+		# Get the name of the class we are defined as ( subclass ).
+		# Note that we use __name here so that the attribute 'name' still behaves the same way.
+		@__name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
 
 		# If no document id was specified, then make a post request
 		# to the server to request one.
@@ -116,12 +118,17 @@ class Base extends events.EventEmitter
 				# Set the id to be instance wide.
 				@_id = res['id']
 
-				# Call set_helpers
-				@_set_helpers ( ) =>
-					# Emit that we're now ready - our helpers are defined and
-					# any changes that are made to the object will be reflected
-					# in the database.
-					@emit "ready"
+				# Set the name of the new document ( the class ).
+				@_set_name ( err ) =>
+					if err
+						log "Unable to set name: #{err}"
+
+					# Call set_helpers
+					@_set_helpers ( ) =>
+						# Emit that we're now ready - our helpers are defined and
+						# any changes that are made to the object will be reflected
+						# in the database.
+						@emit "ready"
 
 			return
 
@@ -225,6 +232,11 @@ class Base extends events.EventEmitter
 					log "Unable to update the attribute #{attr} for id #{@_id}: #{err}"
 		
 		k
+
+	_set_name: ( cb ) ->
+		# Note that we store the class name in '+name' because CouchDB doesn't let us use
+		# underscore.
+		@Server.update @_id, "+name", @__name, cb
 
 exports.Base	= Base
 exports.Server	= Server
