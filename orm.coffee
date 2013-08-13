@@ -264,7 +264,7 @@ class Base extends events.EventEmitter
 
 				# If we hit one that isn't, simply call _update_views which will
 				# take care of setting them all.
-				if _view not in doc.views
+				if _view not of doc.views
 					return @_update_views cb
 
 			# Every single view that was supposed to exist, does. Simply callback.
@@ -273,6 +273,7 @@ class Base extends events.EventEmitter
 	_update_views: ( cb ) ->
 		# This function actually updates / creates the design document.
 		# It also generates the view functions and populates them.
+		log "Got called to update the views.."
 		cb( )
 		
 
