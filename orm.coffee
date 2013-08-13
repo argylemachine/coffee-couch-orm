@@ -106,41 +106,44 @@ class Base extends events.EventEmitter
 		# Note that we use __name here so that the attribute 'name' still behaves the same way.
 		@__name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
 
-		# If no document id was specified, then make a post request
-		# to the server to request one.
-		if not _id
-			@Server.post { }, ( err, res ) =>
-				
-				# If we error out at this stage things aren't good!
-				if err
-					return log err
+		# Make sure the views are valid..
+		@_ensure_views ( ) =>
 
-				# Set the id to be instance wide.
-				@_id = res['id']
-
-				# Set the name of the new document ( the class ).
-				@_set_name ( err ) =>
+			# If no document id was specified, then make a post request
+			# to the server to request one.
+			if not _id
+				@Server.post { }, ( err, res ) =>
+					
+					# If we error out at this stage things aren't good!
 					if err
-						log "Unable to set name: #{err}"
+						return log err
 
-					# Call set_helpers
-					@_set_helpers ( ) =>
-						# Emit that we're now ready - our helpers are defined and
-						# any changes that are made to the object will be reflected
-						# in the database.
-						@emit "ready"
+					# Set the id to be instance wide.
+					@_id = res['id']
 
-			return
+					# Set the name of the new document ( the class ).
+					@_set_name ( err ) =>
+						if err
+							log "Unable to set name: #{err}"
 
-		# Set the id that was specified instance wide.
-		@_id = _id
+						# Call set_helpers
+						@_set_helpers ( ) =>
+							# Emit that we're now ready - our helpers are defined and
+							# any changes that are made to the object will be reflected
+							# in the database.
+							@emit "ready"
 
-		# Call set_helpers..
-		@_set_helpers ( ) =>
+				return
 
-			# When set_helpers is done, we should notify everybody that we're ready
-			# to be used like any other object at this point.
-			@emit "ready"
+			# Set the id that was specified instance wide.
+			@_id = _id
+
+			# Call set_helpers..
+			@_set_helpers ( ) =>
+
+				# When set_helpers is done, we should notify everybody that we're ready
+				# to be used like any other object at this point.
+				@emit "ready"
 
 	find: ( filter ) ->
 		# Find any objects that match the given filter.
@@ -237,6 +240,11 @@ class Base extends events.EventEmitter
 		# Note that we store the class name in '+name' because CouchDB doesn't let us use
 		# underscore.
 		@Server.update @_id, "+name", @__name, cb
+
+	_ensure_views: ( cb ) ->
+		# This function ensures that the basic ORM views are defined and all up to date.
+
+		cb( )
 
 exports.Base	= Base
 exports.Server	= Server
