@@ -146,9 +146,15 @@ class Base extends events.EventEmitter
 				@emit "ready"
 
 	find: ( filter ) ->
-		# Find any objects that match the given filter.
 		_ret = [ ]
 
+		# Iterate through each key / value that was specified by the filter.
+		for key, val of filter
+			
+			# Make a request for the particular view, with the start and end key 
+			# being derived from the key and val.
+			#TODO
+			log "Key is '#{key}' and val is '#{val}'"
 		_ret
 		
 	_get_attributes: ( ) ->
@@ -274,6 +280,7 @@ class Base extends events.EventEmitter
 		# This function actually updates / creates the design document.
 		# It also generates the view functions and populates them.
 		log "Got called to update the views.."
+		
 		cb( )
 		
 

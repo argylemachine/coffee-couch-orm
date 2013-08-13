@@ -23,5 +23,5 @@ orm.Base.prototype.Server = new orm.Server "http://localhost:5984/", "orm"
 rob = new Person "Rob", 22
 
 rob.once "ready", ( ) ->
-
-	log rob
+	
+	log Person.prototype.find { "first_name": "Rob", "age": 22 }
