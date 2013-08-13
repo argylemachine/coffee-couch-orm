@@ -238,13 +238,43 @@ class Base extends events.EventEmitter
 
 	_set_name: ( cb ) ->
 		# Note that we store the class name in '+name' because CouchDB doesn't let us use
-		# underscore.
+		# an underscore.
 		@Server.update @_id, "+name", @__name, cb
 
 	_ensure_views: ( cb ) ->
 		# This function ensures that the basic ORM views are defined and all up to date.
 
+		# Make a request to ensure the design document exists..
+		@Server.get "_design/orm", ( err, doc ) =>
+
+			# Create the design document if it doesn't exist..
+			if err and err is 'not_found'
+				log "Couldn't find orm design.."
+				log "TODO"
+
+			# Exit out at this point if we get an error for some reason..
+			if err
+				return log "Unable to ensure views: #{err}"
+
+			# Verify that the views pertaining to @__name exist in the document..
+			_views = [ @__name + "-attr-val" ]
+
+			# Run through all the views that should be defined.
+			for _view in _views
+
+				# If we hit one that isn't, simply call _update_views which will
+				# take care of setting them all.
+				if _view not in doc.views
+					return @_update_views cb
+
+			# Every single view that was supposed to exist, does. Simply callback.
+			cb( )
+
+	_update_views: ( cb ) ->
+		# This function actually updates / creates the design document.
+		# It also generates the view functions and populates them.
 		cb( )
+		
 
 exports.Base	= Base
 exports.Server	= Server
