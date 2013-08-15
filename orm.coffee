@@ -2,6 +2,7 @@ log	= require("logging").from __filename
 http	= require "http"
 url	= require "url"
 events	= require "events"
+async	= require "async"
 
 class Server
 
@@ -17,6 +18,8 @@ class Server
 			method	= "GET"
 
 		_url = @url + @db + "/" + path
+
+		log "Request for URL '#{_url}'"
 
 		_opts = url.parse _url
 		_opts["method"] = method
@@ -146,16 +149,40 @@ class Base extends events.EventEmitter
 				@emit "ready"
 
 	find: ( filter ) ->
-		_ret = [ ]
 
-		# Iterate through each key / value that was specified by the filter.
+		that	= @
+
+		# A simple object to store IDs of documents that match
+		_ids	= { }
+
+		# Split up the filter into specific querys that can be run
+		# in parallel.
+		_query_params = [ ]
 		for key, val of filter
-			
-			# Make a request for the particular view, with the start and end key 
-			# being derived from the key and val.
-			#TODO
-			log "Key is '#{key}' and val is '#{val}'"
-		_ret
+			_query_params.push [ key, val ]
+		
+		# Make a request for each of the views..
+		async.map _query_params, ( query_params, cb ) ->
+
+			log "Name is #{that[__name]}"
+			that.Server.req "_desgin/orm/_view/#{that.__name}-attr-val", ( err, res ) ->
+				if err
+					return cb err
+
+				# Iterate over res.rows..
+				for row in res.rows
+					_ids[row.id] = true
+
+				cb null
+		, ( err, res ) ->
+
+			# log an error if we got one from the queries..
+			if err
+				return log "Got error of '#{err}'"
+
+			# Disregard res at this point since we know that _ids are valid..
+			for key, val of _ids
+				log "Got id of #{key}"
 		
 	_get_attributes: ( ) ->
 		_ret = [ ]
