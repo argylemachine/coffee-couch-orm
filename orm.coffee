@@ -19,8 +19,6 @@ class Server
 
 		_url = @url + @db + "/" + path
 
-		log "Request for URL '#{_url}'"
-
 		_opts = url.parse _url
 		_opts["method"] = method
 		if content_type
@@ -160,11 +158,16 @@ class Base extends events.EventEmitter
 		_query_params = [ ]
 		for key, val of filter
 			_query_params.push [ key, val ]
+
+		_name = @__name
+
+		log "MEH: #{@__name}"
 		
 		# Make a request for each of the views..
-		async.map _query_params, ( query_params, cb ) ->
+		async.map _query_params, ( query_params, cb ) =>
 
-			log "Name is #{that[__name]}"
+			log "FO: #{_name}"
+			log "Name is #{that.__name}"
 			that.Server.req "_desgin/orm/_view/#{that.__name}-attr-val", ( err, res ) ->
 				if err
 					return cb err
