@@ -103,9 +103,7 @@ class Base extends events.EventEmitter
 
 	constructor: ( _id ) ->
 
-		# Get the name of the class we are defined as ( subclass ).
-		# Note that we use __name here so that the attribute 'name' still behaves the same way.
-		@__name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
+		@_get_name( )
 
 		# Make sure the views are valid..
 		@_ensure_views ( ) =>
@@ -146,8 +144,18 @@ class Base extends events.EventEmitter
 				# to be used like any other object at this point.
 				@emit "ready"
 
-	find: ( filter ) ->
+	_get_name: ( ) ->
+		# Get the name of the class we are defined as ( subclass ).
+		# Note that we use __name here so that the attribute 'name' still behaves the same way.
+		@__name = /function (.{1,})\(/.exec( @constructor.toString() )[1]
 
+
+	find: ( filter, cb ) ->
+
+		# Ensure that we have @__name defined..
+		@_get_name( )
+
+		# Because async.map rids us of our 'this' ( @ ) in coffeescript speak, we assign 'that'.
 		that	= @
 
 		# A simple object to store IDs of documents that match
@@ -159,22 +167,19 @@ class Base extends events.EventEmitter
 		for key, val of filter
 			_query_params.push [ key, val ]
 
-		_name = @__name
-
-		log "MEH: #{@__name}"
-		
 		# Make a request for each of the views..
 		async.map _query_params, ( query_params, cb ) =>
 
-			log "FO: #{_name}"
-			log "Name is #{that.__name}"
-			that.Server.req "_desgin/orm/_view/#{that.__name}-attr-val", ( err, res ) ->
+			that.Server.req "_design/orm/_view/#{that.__name}-attr-val?key=[\"#{query_params[0]}\",\"#{query_params[1]}\"]", ( err, res ) ->
 				if err
 					return cb err
 
 				# Iterate over res.rows..
 				for row in res.rows
-					_ids[row.id] = true
+					if _ids[row.id]?
+						_ids[row.id] += 1
+					else
+						_ids[row.id] = 1
 
 				cb null
 		, ( err, res ) ->
@@ -185,7 +190,8 @@ class Base extends events.EventEmitter
 
 			# Disregard res at this point since we know that _ids are valid..
 			for key, val of _ids
-				log "Got id of #{key}"
+				if val is _query_params.length-1
+					log "Got key of '#{key}' and val of '#{val}'"
 		
 	_get_attributes: ( ) ->
 		_ret = [ ]
