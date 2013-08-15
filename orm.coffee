@@ -153,6 +153,7 @@ class Base extends events.EventEmitter
 	find: ( filter, cb ) ->
 
 		# Ensure that we have @__name defined..
+		# We need this because the class object could be being used instead of an instance.
 		@_get_name( )
 
 		# Because async.map rids us of our 'this' ( @ ) in coffeescript speak, we assign 'that'.
