@@ -203,6 +203,7 @@ class Base extends events.EventEmitter
 			_doc_ids = [ ]
 			_doc_ids.push key for key, val of _ids when _query_params.length is val
 
+			# Make a query for all the doc ids that are valid.
 			async.map _doc_ids, ( _doc_id, cb ) ->
 				that.Server.get _doc_id, ( err, doc ) ->
 					if err
@@ -213,9 +214,15 @@ class Base extends events.EventEmitter
 			, ( err, res ) ->
 				if err
 					return log err
+
+				# This is the main cb for the find function. Since the async.map
+				# function takes care of creating the instances, it is already a list of objects.
 				return cb null, res
 
 	_get_attributes: ( ) ->
+		# This function iterates over the prototype function definitions
+		# and searches them with a regex looking for variables that are class wide.
+		
 		_ret = [ ]
 
 		# Generate a list of functions to ignore when looking for attributes.
@@ -224,6 +231,7 @@ class Base extends events.EventEmitter
 		for key, value of Base.prototype
 			to_exclude.push key
 
+		# Iterate over the class prototype. Only search functions that do not begin with "_" and are not in our exclude list.
 		for key, value of (@) when typeof( @[key] ) is "function" and not ( key.charAt( 0 ) is "_" ) and key not in to_exclude
 			
 			str_value = String value
