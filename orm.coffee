@@ -169,7 +169,7 @@ class Base extends events.EventEmitter
 			_query_params.push [ key, val ]
 
 		# Make a request for each of the views..
-		async.map _query_params, ( query_params, cb ) =>
+		async.map _query_params, ( query_params, cb ) ->
 
 			# Build up the path that we'll query.
 			_path = "_design/orm/_view/#{that.__name}-attr-val?key=[\"#{query_params[0]}\","
@@ -200,9 +200,18 @@ class Base extends events.EventEmitter
 				return log "Got error of '#{err}'"
 
 			# Disregard res at this point since we know that _ids are valid..
-			for key, val of _ids
-				if _query_params.length is val
-					log "Key is #{key} and val is #{val}"
+			async.map [key for key, val of _ids when _query_params.length is val], ( _doc_id, cb ) ->
+				that.Server.get _doc_id, ( err, doc ) ->
+					if err
+						return cb err
+
+					# TODO, create new instances of the class rather than the document.
+					return cb null, doc
+			, ( err, res ) ->
+				if err
+					return log err
+				return cb null, res
+
 	_get_attributes: ( ) ->
 		_ret = [ ]
 
