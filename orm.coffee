@@ -210,7 +210,7 @@ class Base extends events.EventEmitter
 					if err
 						return cb "Error for doc id #{_doc_id}: #{err}"
 
-					return cb null, that._create doc
+					return cb null, that.create doc
 			, ( err, res ) ->
 				if err
 					return log err
@@ -218,12 +218,6 @@ class Base extends events.EventEmitter
 				# This is the main cb for the find function. Since the async.map
 				# function takes care of creating the instances, it is already a list of objects.
 				return cb null, res
-
-	_create: ( doc ) ->
-		# This function handles the creation of a new instance of the class, given the
-		# input document.
-		log "Got create for class of '#{@__name}' and doc of #{util.inspect doc}"
-		return { }
 
 	_get_attributes: ( ) ->
 		# This function iterates over the prototype function definitions

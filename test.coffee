@@ -7,6 +7,10 @@ class Person extends orm.Base
 	constructor: ( @first_name, @age ) ->
 		super( )
 
+	create: ( doc ) ->
+		_o = new Person doc.first_name, doc.age
+		_o
+
 	say_hi: ( ) ->
 		"Hi " + @first_name + ", you're " + @age
 
@@ -20,9 +24,7 @@ class Person extends orm.Base
 # Create a new instance of the server, and set the instance to be class wide. ( All instances of orm.Base ).
 orm.Base.prototype.Server = new orm.Server "http://localhost:5984/", "orm"
 
-rob = new Person "Rob", 22
+Person.prototype.find { "first_name": "Robert" }, ( err, people ) ->
+	log "People are #{util.inspect people}"
 
-rob.once "ready", ( ) ->
-	
-	Person.prototype.find { "first_name": "Robert" }, ( err, people ) ->
-		log "People are #{util.inspect people}"
+	log people[0]
