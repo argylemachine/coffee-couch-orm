@@ -7,10 +7,6 @@ class Person extends orm.Base
 	constructor: ( @first_name, @age ) ->
 		super( )
 
-	create: ( doc ) ->
-		_o = new Person doc.first_name, doc.age
-		_o
-
 	say_hi: ( ) ->
 		"Hi " + @first_name + ", you're " + @age
 

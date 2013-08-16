@@ -219,6 +219,11 @@ class Base extends events.EventEmitter
 				# function takes care of creating the instances, it is already a list of objects.
 				return cb null, res
 
+	create: ( doc ) ->
+		# Create a new instance of object @__name using the doc.
+		log eval( "#{@__name}" )
+		return { }
+
 	_get_attributes: ( ) ->
 		# This function iterates over the prototype function definitions
 		# and searches them with a regex looking for variables that are class wide.
