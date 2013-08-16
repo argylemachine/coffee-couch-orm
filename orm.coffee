@@ -3,6 +3,7 @@ http	= require "http"
 url	= require "url"
 events	= require "events"
 async	= require "async"
+util	= require "util"
 
 class Server
 
@@ -209,9 +210,7 @@ class Base extends events.EventEmitter
 					if err
 						return cb "Error for doc id #{_doc_id}: #{err}"
 
-					# TODO, create new instances of the class rather than the document.
-					log "Would create new instance of #{that.__name} using doc #{doc}"
-					return cb null, doc
+					return cb null, that._create doc
 			, ( err, res ) ->
 				if err
 					return log err
@@ -219,6 +218,12 @@ class Base extends events.EventEmitter
 				# This is the main cb for the find function. Since the async.map
 				# function takes care of creating the instances, it is already a list of objects.
 				return cb null, res
+
+	_create: ( doc ) ->
+		# This function handles the creation of a new instance of the class, given the
+		# input document.
+		log "Got create for class of '#{@__name}' and doc of #{util.inspect doc}"
+		return { }
 
 	_get_attributes: ( ) ->
 		# This function iterates over the prototype function definitions
