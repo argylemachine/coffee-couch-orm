@@ -220,8 +220,7 @@ class Base extends events.EventEmitter
 				return cb null, res
 
 	create: ( doc ) ->
-		# Create a new instance of object @__name using the doc.
-		log @constructor.prototype
+		# Create a new instance of type #{@__name} using the doc.
 		return { }
 
 	_get_attributes: ( ) ->

@@ -20,7 +20,7 @@ class Person extends orm.Base
 # Create a new instance of the server, and set the instance to be class wide. ( All instances of orm.Base ).
 orm.Base.prototype.Server = new orm.Server "http://localhost:5984/", "orm"
 
-Person.prototype.find { "first_name": "Robert" }, ( err, people ) ->
+Person.prototype.find { "first_name": "Robert", "age": 23 }, ( err, people ) ->
 	log "People are #{util.inspect people}"
 
 	log people[0]
