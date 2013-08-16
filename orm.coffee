@@ -221,7 +221,7 @@ class Base extends events.EventEmitter
 
 	create: ( doc ) ->
 		# Create a new instance of object @__name using the doc.
-		log eval( "#{@__name}" )
+		log @constructor.prototype
 		return { }
 
 	_get_attributes: ( ) ->
