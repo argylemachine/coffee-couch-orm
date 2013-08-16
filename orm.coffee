@@ -171,7 +171,17 @@ class Base extends events.EventEmitter
 		# Make a request for each of the views..
 		async.map _query_params, ( query_params, cb ) =>
 
-			that.Server.req "_design/orm/_view/#{that.__name}-attr-val?key=[\"#{query_params[0]}\",\"#{query_params[1]}\"]", ( err, res ) ->
+			# Build up the path that we'll query.
+			_path = "_design/orm/_view/#{that.__name}-attr-val?key=[\"#{query_params[0]}\","
+
+			# Detect the type of query_params[1]. If it is an int, don't add quotes.
+			if typeof query_params[1] is "number"
+				_path += query_params[1]
+			else
+				_path += "\"#{query_params[1]}\""
+			_path += "]"
+
+			that.Server.req _path, ( err, res ) ->
 				if err
 					return cb err
 
@@ -191,9 +201,8 @@ class Base extends events.EventEmitter
 
 			# Disregard res at this point since we know that _ids are valid..
 			for key, val of _ids
-				if val is _query_params.length-1
-					log "Got key of '#{key}' and val of '#{val}'"
-		
+				if _query_params.length is val
+					log "Key is #{key} and val is #{val}"
 	_get_attributes: ( ) ->
 		_ret = [ ]
 

@@ -24,5 +24,5 @@ rob = new Person "Rob", 22
 
 rob.once "ready", ( ) ->
 	
-	people = Person.prototype.find { "first_name": "Robert", "age": 22 }
+	people = Person.prototype.find { "first_name": "Robert", "age": 23 }
 	log "People are #{people}"
