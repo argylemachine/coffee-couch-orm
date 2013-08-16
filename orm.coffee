@@ -210,6 +210,7 @@ class Base extends events.EventEmitter
 						return cb "Error for doc id #{_doc_id}: #{err}"
 
 					# TODO, create new instances of the class rather than the document.
+					log "Would create new instance of #{that.__name} using doc #{doc}"
 					return cb null, doc
 			, ( err, res ) ->
 				if err
