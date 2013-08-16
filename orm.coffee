@@ -200,10 +200,13 @@ class Base extends events.EventEmitter
 				return log "Got error of '#{err}'"
 
 			# Disregard res at this point since we know that _ids are valid..
-			async.map [key for key, val of _ids when _query_params.length is val], ( _doc_id, cb ) ->
+			_doc_ids = [ ]
+			_doc_ids.push key for key, val of _ids when _query_params.length is val
+
+			async.map _doc_ids, ( _doc_id, cb ) ->
 				that.Server.get _doc_id, ( err, doc ) ->
 					if err
-						return cb err
+						return cb "Error for doc id #{_doc_id}: #{err}"
 
 					# TODO, create new instances of the class rather than the document.
 					return cb null, doc
