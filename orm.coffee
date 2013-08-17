@@ -223,8 +223,10 @@ class Base extends events.EventEmitter
 		# Create a new instance of type #{@__name} using the doc.
 
 		_o = new @constructor( )
-		log "o is #{util.inspect _o}"
+		for key, val of _o when typeof _o[key] is "function"
+			eval "_o.#{key} = doc[key]"
 
+		log _o
 		process.exit 1
 		###
 		for key, val of doc
