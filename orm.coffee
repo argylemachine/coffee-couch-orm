@@ -222,17 +222,18 @@ class Base extends events.EventEmitter
 	create: ( doc ) ->
 		# Create a new instance of type #{@__name} using the doc.
 
-		_o = ( ) ->
-			
-		for key, val of @
-			_o[key] = val
+		_o = new @constructor( )
+		log "o is #{util.inspect _o}"
 
-		for key, val of @constructor.prototype
-			_o.prototype[key] = val
+		process.exit 1
+		###
+		for key, val of doc
+			_func = _o[key]
+			log "Func is #{_func}"
+			#_o[key] = val
+		###
 		
-		_o.prototype.constructor( )
-	
-		log "I have o of #{util.inspect _o}"
+		log "O is #{util.inspect _o}"
 
 		return { }
 
