@@ -5,9 +5,25 @@ events	= require "events"
 
 class Server
 
-	constructor: ( @url, @db ) ->
+	constructor: ( @url, @db, @num_recursion=5 ) ->
 		
+
 	req: ( path, method, data, content_type, cb ) ->
+
+		# If the requests object doesn't exist, create it.
+		if not @requests?
+			@requests = { }
+
+		if not @requests["_"+path]?
+			# Set the request counter to 1
+			@requests["_"+path] = 1
+		else
+			# Increment the request counter by one if it already exists.
+			@requests["_"+path] += 1
+		
+		# Sanity check regarding the number of times to try this particular path.
+		if @requests["_"+path] > @num_recursions
+			return cb "Max recursion hit"
 
 		# Allow either all 5 or just 2
 		# * req foo, "POST", "some data", "text/plain", ( ) ->
