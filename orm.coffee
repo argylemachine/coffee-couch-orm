@@ -104,6 +104,8 @@ class Base extends events.EventEmitter
 
 	constructor: ( _id ) ->
 
+		log "I have ID of #{_id}"
+
 		@_get_name( )
 
 		# Make sure the views are valid..
@@ -220,13 +222,20 @@ class Base extends events.EventEmitter
 				return cb null, res
 
 	create: ( doc ) ->
-		# Create a new instance of type #{@__name} using the doc.
+		# This function creates a new instance of a class given the document.
 
+		# Because running something similar to `_o = new @constructor( )` would give us
+		# a valid object, but run the constructor before we have set _id, ..
+		
 		_o = new @constructor( )
+
+		_o._id = doc._id
+
 		for key, val of _o when typeof _o[key] is "function"
 			eval "_o.#{key} = doc[key]"
 
 		log _o
+
 		process.exit 1
 		###
 		for key, val of doc

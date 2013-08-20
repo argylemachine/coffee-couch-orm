@@ -5,7 +5,7 @@ util	= require "util"
 class Person extends orm.Base
 
 	constructor: ( @first_name, @age ) ->
-		super( )
+		super( @_id )
 
 	say_hi: ( ) ->
 		"Hi " + @first_name + ", you're " + @age
