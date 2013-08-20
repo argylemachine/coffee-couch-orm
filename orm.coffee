@@ -102,9 +102,10 @@ class Server
 
 class Base extends events.EventEmitter
 
-	constructor: ( _id ) ->
+	constructor: ( ) ->
 
-		log "I have ID of #{_id}"
+		log "Running constructor.."
+		log util.inspect @
 
 		@_get_name( )
 
@@ -226,25 +227,33 @@ class Base extends events.EventEmitter
 
 		# Because running something similar to `_o = new @constructor( )` would give us
 		# a valid object, but run the constructor before we have set _id, ..
-		
-		_o = new @constructor( )
 
-		_o._id = doc._id
+		# Create a copy of the class itself.. then modify the prototype to include an identifier?
+		# in this way the type would remain the same ( albeit with different classes..but a typeof would still work )
+		# and the object could be created without too much hassle.
 
-		for key, val of _o when typeof _o[key] is "function"
-			eval "_o.#{key} = doc[key]"
+		# Define the new object we're going to use instead of @
+		_o = ( ) ->
+			
+		# Iterate over the prototype and set our new object up..
+		for key, val of @::
+			_o.prototype[key] = val
 
-		log _o
+		# Iterate over our instance attributes and set our new object up.
+		for key, val of @
+			_o[key] = val
 
-		process.exit 1
-		###
-		for key, val of doc
-			_func = _o[key]
-			log "Func is #{_func}"
-			#_o[key] = val
-		###
-		
+		# Set the doc id. Note this is done before the constructor is called.
+		_o.prototype.__defineGetter__ "IDENT", ( ) ->
+						doc._id
+
 		log "O is #{util.inspect _o}"
+
+		_i = new _o.constructor( )
+
+		log "I is #{util.inspect _i}"
+		process.exit 1
+		
 
 		return { }
 
