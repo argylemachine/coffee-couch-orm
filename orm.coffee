@@ -261,8 +261,12 @@ class Base extends events.EventEmitter
 		# Create the string again and set it back to the constructor.
 		_new_constructor = parts.join ""
 
-		_f = Function.constructor.call _o, "return #{_new_constructor}"
-		k = _f( )
+		_f = new Function "return #{_new_constructor}"
+
+		k = _f.call _o
+
+		log "k is #{util.inspect k, true, 9}"
+
 		_o.constructor = k
 
 		_i = _o.constructor( )
