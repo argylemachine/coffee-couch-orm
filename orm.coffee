@@ -261,11 +261,18 @@ class Base extends events.EventEmitter
 		# Create the string again and set it back to the constructor.
 		_new_constructor = parts.join ""
 
-		# Create a new function from the code of _new_constructor.
-		#TODO
-		log _new_constructor
+		# Get a list of arguments for this function..
+		args = _new_constructor.match( /\([\w, ]*\)/ )[0].replace( RegExp( "[\\(\\) ]", "g" ), "" ).split ","
 
-		_o.constructor = _new_constructor
+		# Split out the body of the code..
+		_lines = _new_constructor.split( "\n" )
+		body = _lines.slice( 1, _lines.length-2 ).join ""
+
+		_new_func = Function.apply _o, args.concat( body )
+
+		log "New func is #{_new_func}"
+
+		_o.constructor = _new_func
 
 		_i = new _o.constructor( )
 
