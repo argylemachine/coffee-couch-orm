@@ -104,8 +104,8 @@ class Base extends events.EventEmitter
 
 	constructor: ( ) ->
 
-		###
 		log "Running constructor.."
+		###
 		for key, val of @
 			log "key is #{key}"
 		###
@@ -261,20 +261,13 @@ class Base extends events.EventEmitter
 		# Create the string again and set it back to the constructor.
 		_new_constructor = parts.join ""
 
-		# Get a list of arguments for this function..
-		args = _new_constructor.match( /\([\w, ]*\)/ )[0].replace( RegExp( "[\\(\\) ]", "g" ), "" ).split ","
+		_f = Function.constructor.call _o, "return #{_new_constructor}"
+		k = _f( )
+		_o.constructor = k
 
-		# Split out the body of the code..
-		_lines = _new_constructor.split( "\n" )
-		body = _lines.slice( 1, _lines.length-2 ).join ""
+		_i = _o.constructor( )
 
-		_new_func = Function.apply _o, args.concat( body )
-
-		log "New func is #{_new_func}"
-
-		_o.constructor = _new_func
-
-		_i = new _o.constructor( )
+		log "GOT HERE"
 
 		log "I is #{util.inspect _i}"
 		process.exit 1
