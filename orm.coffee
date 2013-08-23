@@ -104,8 +104,11 @@ class Base extends events.EventEmitter
 
 	constructor: ( ) ->
 
+		###
 		log "Running constructor.."
-		log util.inspect @
+		for key, val of @
+			log "key is #{key}"
+		###
 
 		@_get_name( )
 
@@ -243,17 +246,30 @@ class Base extends events.EventEmitter
 		for key, val of @
 			_o[key] = val
 
-		# Set the doc id. Note this is done before the constructor is called.
-		_o.prototype.__defineGetter__ "IDENT", ( ) ->
-						doc._id
+		# Modify the constructor function to include setting the ID.
+		_constructor_code = _o.constructor.toString( )
 
-		log "O is #{util.inspect _o}"
+		# The regex to find the call to super..
+		reg = new RegExp "#{@__name}\\.__super__\\.constructor\\.call\\(this\\);", "g"
+
+		# Split the constructor code up spliting by the call to super.
+		parts = _constructor_code.split reg
+
+		# Shove an element into the parts setting the id..
+		parts.splice 1, 0, "this._id = \"#{doc._id}\";\n#{@__name}\.__super__\.constructor\.call\(this\);\n"
+
+		# Create the string again and set it back to the constructor.
+		_new_constructor = parts.join ""
+
+		log _new_constructor
+
+		process.exit 1
+		log "o constructor is : #{_o.constructor.toString( )}"
 
 		_i = new _o.constructor( )
 
 		log "I is #{util.inspect _i}"
 		process.exit 1
-		
 
 		return { }
 
