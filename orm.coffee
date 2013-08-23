@@ -261,10 +261,11 @@ class Base extends events.EventEmitter
 		# Create the string again and set it back to the constructor.
 		_new_constructor = parts.join ""
 
+		# Create a new function from the code of _new_constructor.
+		#TODO
 		log _new_constructor
 
-		process.exit 1
-		log "o constructor is : #{_o.constructor.toString( )}"
+		_o.constructor = _new_constructor
 
 		_i = new _o.constructor( )
 
