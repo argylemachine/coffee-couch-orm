@@ -263,18 +263,16 @@ class Base extends events.EventEmitter
 
 		_f = new Function "return #{_new_constructor}"
 
-		k = _f.call _o
+		k = _f()
 
-		log "k is #{util.inspect k, true, 9}"
+		_o.constructor.constructor = k
 
-		_o.constructor = k
+		log util.inspect _o
 
-		_i = _o.constructor( )
-
-		log "GOT HERE"
+		process.exit 1
+		_i = new _o.constructor( )
 
 		log "I is #{util.inspect _i}"
-		process.exit 1
 
 		return { }
 
