@@ -217,8 +217,24 @@ class Base extends events.EventEmitter
 
 		# Because running something similar to `_o = new @constructor( )`
 
+		# Build up a replica class..
+		_o = ( ) ->
+			
+		for key, val of @
+			_o[key] = val
+	
+		for key, val of @::
+			_o.prototype[key] = val
+
+		_i = new _o( )
+
+		log typeof _i
+
 		# Still working on this.
-		_o = new @constructor( )
+		_o = new @constructor
+
+		log typeof _o
+
 		for key, val of doc
 			_o[key] = val
 
