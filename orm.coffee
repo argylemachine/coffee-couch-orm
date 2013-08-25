@@ -103,26 +103,22 @@ class Server
 class Base extends events.EventEmitter
 
 	constructor: ( ) ->
-
-		log "Running constructor.."
-		###
-		for key, val of @
-			log "key is #{key}"
-		###
-
+		# Just base constructor.. make sure that the name of the class
+		# is set instance wide.
 		@_get_name( )
 
+	init: ( cb ) ->
 		# Make sure the views are valid..
 		@_ensure_views ( ) =>
 
 			# If no document id was specified, then make a post request
 			# to the server to request one.
-			if not _id
+			if not @_id
 				@Server.post { }, ( err, res ) =>
 					
 					# If we error out at this stage things aren't good!
 					if err
-						return log err
+						return cb err
 
 					# Set the id to be instance wide.
 					@_id = res['id']
@@ -133,23 +129,13 @@ class Base extends events.EventEmitter
 							log "Unable to set name: #{err}"
 
 						# Call set_helpers
-						@_set_helpers ( ) =>
-							# Emit that we're now ready - our helpers are defined and
-							# any changes that are made to the object will be reflected
-							# in the database.
-							@emit "ready"
-
-				return
-
-			# Set the id that was specified instance wide.
-			@_id = _id
-
-			# Call set_helpers..
-			@_set_helpers ( ) =>
-
-				# When set_helpers is done, we should notify everybody that we're ready
-				# to be used like any other object at this point.
-				@emit "ready"
+						return @_set_helpers cb 
+			else
+				# An ID was specified.. just set the headers.
+			
+				# Call set_helpers. Note that we pass our cb over to _set_helpers because it will simply
+				# come back with no error..
+				return @_set_helpers cb 
 
 	_get_name: ( ) ->
 		# Get the name of the class we are defined as ( subclass ).
@@ -160,7 +146,8 @@ class Base extends events.EventEmitter
 	find: ( filter, cb ) ->
 
 		# Ensure that we have @__name defined..
-		# We need this because the class object could be being used instead of an instance.
+		# We need this because the class object could be being used instead of an instance, so the constructor
+		# may not have been run.
 		@_get_name( )
 
 		# Because async.map rids us of our 'this' ( @ ) in coffeescript speak, we assign 'that'.
@@ -228,53 +215,14 @@ class Base extends events.EventEmitter
 	create: ( doc ) ->
 		# This function creates a new instance of a class given the document.
 
-		# Because running something similar to `_o = new @constructor( )` would give us
-		# a valid object, but run the constructor before we have set _id, ..
+		# Because running something similar to `_o = new @constructor( )`
 
-		# Create a copy of the class itself.. then modify the prototype to include an identifier?
-		# in this way the type would remain the same ( albeit with different classes..but a typeof would still work )
-		# and the object could be created without too much hassle.
-
-		# Define the new object we're going to use instead of @
-		_o = ( ) ->
-			
-		# Iterate over the prototype and set our new object up..
-		for key, val of @::
-			_o.prototype[key] = val
-
-		# Iterate over our instance attributes and set our new object up.
-		for key, val of @
+		# Still working on this.
+		_o = new @constructor( )
+		for key, val of doc
 			_o[key] = val
 
-		# Modify the constructor function to include setting the ID.
-		_constructor_code = _o.constructor.toString( )
-
-		# The regex to find the call to super..
-		reg = new RegExp "#{@__name}\\.__super__\\.constructor\\.call\\(this\\);", "g"
-
-		# Split the constructor code up spliting by the call to super.
-		parts = _constructor_code.split reg
-
-		# Shove an element into the parts setting the id..
-		parts.splice 1, 0, "this._id = \"#{doc._id}\";\n#{@__name}\.__super__\.constructor\.call\(this\);\n"
-
-		# Create the string again and set it back to the constructor.
-		_new_constructor = parts.join ""
-
-		_f = new Function "return #{_new_constructor}"
-
-		k = _f()
-
-		_o.constructor.constructor = k
-
-		log util.inspect _o
-
-		process.exit 1
-		_i = new _o.constructor( )
-
-		log "I is #{util.inspect _i}"
-
-		return { }
+		return _o
 
 	_get_attributes: ( ) ->
 		# This function iterates over the prototype function definitions
