@@ -60,6 +60,8 @@ class Server
 	update: ( _id, attr, val, cb ) ->
 		# Update the document _id by setting the attribute 'attr' to 'val'.
 
+		log "Got update for #{_id}, #{attr}, #{val} - #{cb}"
+
 		_try_update = ( doc ) =>
 			# Get the current document
 			@get _id, ( err, doc ) =>
@@ -214,31 +216,8 @@ class Base extends events.EventEmitter
 
 	create: ( doc ) ->
 		# This function creates a new instance of a class given the document.
-
-		# Because running something similar to `_o = new @constructor( )`
-
-		# Build up a replica class..
-		_o = ( ) ->
-			
-		for key, val of @
-			_o[key] = val
-	
-		for key, val of @::
-			_o.prototype[key] = val
-
-		_i = new _o( )
-
-		log typeof _i
-
-		# Still working on this.
-		_o = new @constructor
-
-		log typeof _o
-
-		for key, val of doc
-			_o[key] = val
-
-		return _o
+		# TODO
+		return doc
 
 	_get_attributes: ( ) ->
 		# This function iterates over the prototype function definitions
@@ -281,20 +260,24 @@ class Base extends events.EventEmitter
 
 	_set_helpers: ( cb ) ->
 
-		# Iterate through all the attributes we shuld hook up with getters and setters.
-		for attribute in @_get_attributes( )
+		that = @
+
+		async.each @_get_attributes( ), ( attribute, cb ) ->
 			
 			# Keep the current value of the attribute as it is right now.
-			_val = @[attribute]
+			_val = that[attribute]
 
 			# Define the getters and setters for the attribute.
-			@.__defineGetter__ attribute, @_generate_getter attribute
-			@.__defineSetter__ attribute, @_generate_setter attribute
+			that.__defineGetter__ attribute, that._generate_getter attribute
+			that.__defineSetter__ attribute, that._generate_setter attribute
 
-			# Set the attribute value back. Note that this will run through the
-			# setter that we just defined.
-			@[attribute] = _val
-		cb( )
+			# Set the attribute value back. Note that we do _not_ use the setter we have
+			# just defined, as it doesn't accept a cb argument.
+			that.set that._id, attribute, _val, cb
+		, ( err ) ->
+			if err
+				return cb err
+			cb null
 
 	_generate_getter: ( attr ) ->
 		# Helper function that generates a getter function for the attribute that is passed in.
@@ -326,8 +309,11 @@ class Base extends events.EventEmitter
 			@Server.update @_id, attr, val, ( err ) =>
 				if err
 					log "Unable to update the attribute #{attr} for id #{@_id}: #{err}"
-		
 		k
+
+	set: ( attr, val, cb ) ->
+		@["_"+attr] = val
+		@Server.update @_id, attr, val, cb
 
 	_set_name: ( cb ) ->
 		# Note that we store the class name in '+name' because CouchDB doesn't let us use
